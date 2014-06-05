@@ -55,7 +55,12 @@
 	font-size: 0.9em;
 }
 
-#statlist{
+.moves{
+	font-family: Arial, sans-serif;
+	font-size: 0.9em;
+}
+
+.statlist{
 	list-style-type:none;
 }
 
