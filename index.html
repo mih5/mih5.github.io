@@ -89,12 +89,14 @@
 		cursor.append("text")
 				.attr("x", 4)
 				.attr("y", -4)
+				.attr("font-family", "Arial, sans-serif")
 				.text("Click!");
 		
-		var data = generateData(1),
+		var fulldata = generateData(6),
+			data = fulldata.slice(0,3),
 			stats = calcStats(data),
 			iter = 0,
-			targetCorrelation = Math.round((Math.random() * (2) -1)*100)/100;	
+			targetCorrelation = Math.round(correlationCalculate(fulldata, function(d) {return d.x;}, function(d) {return d.y;})*100)/100;	
 		
 		
 		//----------------------------------------------------START----------------------------------------------------
@@ -135,13 +137,12 @@
 			
 			
 			var statDisplay = list.selectAll(".statDisplay")
-								.data(stats);
+								.data(stats.slice(2,6));
 			
 			var statDisplayPlot = svg.selectAll(".statDisplayPlot").data(stats.slice(0,2));
 			
 			var lines = svg.selectAll(".lines").data(stats.slice(2,4));
 			
-			console.log(stats.slice(2,4));
 			
 			//UPDATE STEP
 
@@ -150,7 +151,8 @@
 				
 			statDisplay.text(function(d) { return d.name+": "+d.stat;});
 			
-			statDisplayPlot.text(function(d) { return d.name+":	"+d.stat;});
+			statDisplayPlot.attr("fill", function(d,i) { if(i==1){ if(stats[0].stat==stats[1].stat){return "green";} else{return "red";}} } )
+				.text(function(d) { return d.name+":	"+d.stat;});
 			
 			lines.transition().duration(300)
 				.attr("x", function(d, i) {return xScale(d.stat)*(1-i);})
@@ -191,6 +193,8 @@
 						.attr("x",390)
 						.attr("y", function(d, i) {return i*15;})
 						.attr("text-anchor", "end")
+						.attr("font-family", "Arial, sans-serif")
+						.attr("fill", function(d, i) {if (i == 1){return "red";} else{ return "black";}})
 						.text(function(d) { return d.name+":	"+d.stat;});
 						
 			lines.enter()
@@ -218,7 +222,6 @@
 				.duration(750)
 				.call(yAxis);		
 
-			
 		
 		}
 		
@@ -260,7 +263,6 @@
 		function mousemove() {
 		  var coords = [d3.mouse(this)[0] - margin.left, d3.mouse(this)[1] - margin.top]
 		  cursor.attr("transform", "translate(" + coords + ")");
-		  console.log(iter);
 		}
 		
 		function mousedown() {
@@ -273,17 +275,18 @@
 		}
 		
 		function restart() {
-			data = generateData(1);
-			targetCorrelation = Math.round((Math.random() * (2) -1)*100)/100;
+			fulldata = generateData(6);
+			data = fulldata.slice(0,3);
+			targetCorrelation = Math.round(correlationCalculate(fulldata, function(d) {return d.x;}, function(d) {return d.y;})*100)/100;
 			iter = 0;
 			updateChart(data);
 		}
 		
 		//Utility functions
 		
-		function generateData(difficulty){
-			var X =  rnorm(5);
-			var Y =  rnorm(5);
+		function generateData(samples){
+			var X =  rnorm(samples);
+			var Y =  rnorm(samples);
 			var data = [];
 		
 			for (var i = 0; i < X.length; i++){
