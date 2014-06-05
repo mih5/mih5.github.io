@@ -79,10 +79,17 @@
 		var yScale = d3.scale.linear()
 			.range([height,0]);
 		
-		var cursor = cursor = svg.append("circle")
-			.attr("r", 6)
-			.attr("transform", "translate(-100,-100)")
-			.attr("class", "cursor");
+		var cursor = svg.append("g").attr("transform", "translate(-100,-100)");
+		
+		
+		cursor.append("circle")
+				.attr("r", 6)
+				.attr("class", "cursor");
+				
+		cursor.append("text")
+				.attr("x", 4)
+				.attr("y", -4)
+				.text("Click!");
 		
 		var data = generateData(1),
 			stats = calcStats(data),
@@ -130,17 +137,30 @@
 			var statDisplay = list.selectAll(".statDisplay")
 								.data(stats);
 			
+			var statDisplayPlot = svg.selectAll(".statDisplayPlot").data(stats.slice(0,2));
+			
+			var lines = svg.selectAll(".lines").data(stats.slice(2,4));
+			
+			console.log(stats.slice(2,4));
+			
 			//UPDATE STEP
 
 			points.transition().duration(300)
 				.attr("transform",function(d){return "translate("+xScale(d.x)+","+yScale(d.y)+")";});
 				
 			statDisplay.text(function(d) { return d.name+": "+d.stat;});
-				
+			
+			statDisplayPlot.text(function(d) { return d.name+":	"+d.stat;});
+			
+			lines.transition().duration(300)
+				.attr("x", function(d, i) {return xScale(d.stat)*(1-i);})
+				.attr("y", function(d, i) {return yScale(d.stat)*i;})
+				.attr("width", function(d, i) {return (1-i)*2+width*i})
+				.attr("height", function(d, i) {return (1-i)*height+2*i;});
+			
 			//EXIT STEP
 			points.exit().remove();
 			
-
 			svg.selectAll(".axis").data([]).exit().transition().duration(1200).style("fill-opacity",1e-6).remove();
 
 			//ENTER STEP
@@ -165,6 +185,22 @@
 						.attr("color",function(d) {return d.color;})
 						.text(function(d) { return d.name+": "+d.stat;});
 				
+			statDisplayPlot.enter()
+					.append("text")
+						.attr("class","statDisplayPlot")
+						.attr("x",390)
+						.attr("y", function(d, i) {return i*15;})
+						.attr("text-anchor", "end")
+						.text(function(d) { return d.name+":	"+d.stat;});
+						
+			lines.enter()
+				.append("rect")
+					.attr("class","lines")
+					.attr("x", function(d, i) {return xScale(d.stat)*(1-i);})
+					.attr("y", function(d, i) {return yScale(d.stat)*i;})
+					.attr("width", function(d, i) {return (1-i)*2+width*i})
+					.attr("height", function(d, i) {return (1-i)*height+2*i;});
+					
 					
 			//Create X axis
 			svg.append("g")
@@ -180,7 +216,9 @@
 				.attr("transform", "translate(0,0)")
 				.transition()
 				.duration(750)
-				.call(yAxis);			
+				.call(yAxis);		
+
+			
 		
 		}
 		
@@ -193,7 +231,7 @@
 				},
 				{
 				stat: Math.round(correlationCalculate(data, function(d) {return d.x;}, function(d) {return d.y;})*100)/100,
-				name: "correlation",
+				name: "your correlation",
 				color: "black"
 				},
 				{
@@ -222,13 +260,15 @@
 		function mousemove() {
 		  var coords = [d3.mouse(this)[0] - margin.left, d3.mouse(this)[1] - margin.top]
 		  cursor.attr("transform", "translate(" + coords + ")");
+		  console.log(iter);
 		}
 		
 		function mousedown() {
 			var point = d3.mouse(this),
 				datapoint = {x: xScale.invert(point[0]- margin.left), y: yScale.invert(point[1] - margin.top), color: "blue"},
 				n = data.push(datapoint);
-			
+				
+			cursor.select("text").remove();
 			updateChart(data);
 		}
 		
