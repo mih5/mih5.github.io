@@ -116,8 +116,8 @@
 			// if this is the first time the plot has been displayed, update the scales
 			if (iter === 0){
 				//update scale
-				xScale.domain([d3.min(data, function(d) {return d.x;} ) - stats[4].stat, d3.max(data, function(d) {return d.x;} ) + stats[4].stat ]);
-				yScale.domain([d3.min(data, function(d) {return d.y;} ) - stats[4].stat, d3.max(data, function(d) {return d.y;} ) + stats[5].stat ]);
+				xScale.domain([d3.min(data, function(d) {return d.x;} ) - 2*stats[4].stat, d3.max(data, function(d) {return d.x;} ) + 2*stats[4].stat ]);
+				yScale.domain([d3.min(data, function(d) {return d.y;} ) - 2*stats[4].stat, d3.max(data, function(d) {return d.y;} ) + 2*stats[5].stat ]);
 			}
 			
 			//store the number of times plot has run
