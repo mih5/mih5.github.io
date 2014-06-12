@@ -1,0 +1,22 @@
+h1 {
+	margin-left:auto;
+	margin-right:auto;
+	text-align: center;
+	font-family: Arial, sans-serif;
+	font-size: 2em;
+	clear: both;
+}
+
+h2 {
+	float: left
+	text-align: center;
+	font-family: Arial, sans-serif;
+	font-size: 1em;
+	clear: both;
+}
+
+#container {
+	margin-left: auto;
+	margin-right: auto;
+	width: 500px;
+}

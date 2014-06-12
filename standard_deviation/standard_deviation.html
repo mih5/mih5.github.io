@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Standard Deviation</title>
+		<link type="text/css" rel="stylesheet" href="standard_deviation.css" />
+        <script src="d3/d3.v3.js"></script>
+    </head>
+    <body>
+        <script>
+		
+		//1. Code that runs when page is loaded
+			
+		//create centered "container" for chart and panels
+		var body = d3.select("body").append("div").attr("id","mainbody");
+		
+		//title
+		body.append("h1").attr("id","heading").text("Standard Deviation");
+		
+		//define margins and size of chart
+		var margin = {top: 20, right: 30, bottom: 30, left: 40},
+			width = 450 - margin.left - margin.right,
+			height = 400 - margin.top - margin.bottom;
+			
+		//create the chart
+		var svg0 = body.append("svg")
+					.attr("class","chart")
+					.attr("width", width + margin.left + margin.right)
+					.attr("height", height + margin.top + margin.bottom)
+					.on("mousemove", mousemove)
+					.on("mousedown", mousedown);
+					
+		var svg = svg0.append("g")
+					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+					
+		var histline = svg.append("rect").attr("transform", "translate(0," + (height-30) + ")").attr("height",1).attr("width",width);
+
+		//group for stat display
+		
+		var displayPanel = body.append("div").attr("id","displayPanel");
+		
+		var statPanel = displayPanel.append("div").attr("id","statdiv");
+
+		var list0 = statPanel.append("ul")
+								.attr("class", "statlist");
+			
+		var list = statPanel.append("ul")
+								.attr("class", "statlist");
+	
+		
+		var controlpanel = displayPanel.append("div").attr("id","controlpanel");
+		
+		//instructional text
+		controlpanel.append("p").text("How close can you get to the target standard devation?").attr("class","paragraphText");
+		controlpanel.append("p").text("Click the plot to add points and change the standard deviation.").attr("class","paragraphText");
+		
+		
+		//reset button
+		
+		//reset button
+		controlpanel.append("input")
+			.attr("type", "button")
+			.attr("value", "Restart" )
+			.attr("onclick", "restart()");
+		
+		//initialize scales for chart
+		var xScale = d3.scale.linear()
+			.range([0,width]);
+		
+		var yScale = d3.scale.linear()
+			.range([(height	),75]);
+			
+		var values = generateData();
+		
+		var iter = 0;
+		
+		var targetSD = selectTarget(sd(values,function(d){return d ;}));
+		
+		var stats = calcStats(values);
+		
+		var intialized = false;
+		
+		//----------------------------------------------------START----------------------------------------------------
+
+		
+		//xScale.domain([d3.min(values),d3.max(values)]);
+		xScale.domain([-4,4]);
+		
+		
+		//create cursor
+		
+		var cursor = svg.append("g").attr("transform", "translate(-100," + (height-30) + ")");
+		
+		cursor.append("rect")
+				.attr("width", 3)
+				.attr("height", 30)
+				.attr("fill-opacity", 0.5);
+			
+		
+		//Initial display
+		updateChart();
+		
+		intialized = true;
+		
+		
+		function updateChart(){
+		
+			iter ++;
+
+				
+			//use the histogram layout
+			var data = d3.layout.histogram().bins(xScale.ticks(10))(values);
+		
+			//update the domain of the scales
+			yScale.domain([0, d3.max(data, function(d) { return d.y; })]);
+		
+				
+			//define X axis
+			var xAxis = d3.svg.axis()
+				.scale(xScale)
+				.orient("bottom");
+				
+			//DATA JOIN
+			var points = svg.selectAll(".points").data(values);
+				
+			var bar = svg.selectAll(".bar")
+				.data(data);
+				
+			var movesLeft = list0.selectAll(".moves").data([10-iter]);	
+			
+			var statLines = svg.selectAll(".statLines").data(stats);
+			
+			//UPDATE
+			
+			points.transition().duration(300)
+				.attr("transform",function(d){return "translate("+xScale(d)+","+(height-15)+")";});
+				
+			bar.transition().duration(300)
+					.attr("transform", function(d) {return "translate(" + xScale(d.x) + "," + (yScale(d.y)-30) + ")"; })
+				.select("rect")
+					.attr("x", 1)
+					.attr("width", xScale(data[0].dx-4) - 1)
+					.attr("height", function(d) { return height - yScale(d.y); });
+					
+			movesLeft.text(function(d) {return "Moves left: " + d;});
+			
+			statLines.transition().duration(300).attr("transform", function(d,i) {return "translate(" + 0 + ","+ (i*30) +")";})
+				.select("rect")
+					.attr("width", function(d) {return xScale(d.stat-4);})
+					.attr("fill", function(d) {return d.color;});
+				
+			statLines.select(".statText").text(function(d) {return d.name + ": " + d.stat;})
+					.attr("fill", function(d) {return d.color;});
+					
+				
+			//ENTER
+			
+			
+			bar.enter().append("g")
+					.attr("class","bar")
+					.attr("transform", function(d) {return "translate(" + xScale(d.x) + "," + (height-30) + ")"; })
+				.append("rect")
+					.attr("x", 1)
+					.attr("width", xScale(data[0].dx-4) - 1)
+					.attr("height", function(d) { return 0; });
+					
+				
+			bar.transition().duration(300)
+					.attr("transform", function(d) {return "translate(" + xScale(d.x) + "," + (yScale(d.y)-30) + ")"; })
+				.select("rect")
+					.attr("height", function(d) { return height - yScale(d.y); })
+					.attr("width", xScale(data[0].dx-4) - 1);
+			
+			points.enter().append("g")
+					.attr("class","points")
+					.attr("transform",function(d){return "translate("+xScale(d)+","+(height-15)+")";})
+				.append("circle")
+					.attr("fill",function(d) {return d.color})
+					.attr("fill-opacity",0)
+					.attr("r",5);
+							
+			points.selectAll("circle")
+					.transition().duration(300)
+					.attr("fill", "red")
+					.attr("fill-opacity",0.5);
+								
+			movesLeft.enter()
+				.append("li")
+				.attr("class", "moves")
+				.text(function(d) { return "Moves left: " + d;});
+				
+
+			statLines.enter()
+				.append("g")
+					.attr("class","statLines")
+					.attr("transform", function(d,i) {return "translate(" + 0 + ","+(i*30)+")";})
+				.append("rect")
+					.attr("width", function(d) {return xScale(d.stat-4);})
+					.attr("height", 2)
+					.attr("fill", function(d) {return d.color;})
+					.attr("fill-opacity", 0)
+						.transition().duration(300)
+						.attr("fill-opacity", 1);
+					
+			if (!intialized){
+				statLines.append("text")
+						.attr("class","statText")
+						.attr("x", 45)
+						.attr("y", -5)
+						.text(function(d) {return d.name + ": " + d.stat;})
+						.attr("fill", function(d) {return d.color;})
+						.attr("fill-opacity", 0)
+						.transition().duration(300)
+						.attr("fill-opacity", 1);
+			}	
+				
+			svg.append("g")
+			.attr("class","axis")
+			.attr("transform", "translate(0," + height + ")")
+			.transition()
+			.duration(750)
+			.call(xAxis);
+			
+			//EXIT
+			
+			points.exit().remove();
+			
+			bar.exit().remove();
+			
+
+	
+		}
+		
+		function mousemove() {
+			var coords = d3.mouse(this)[0] - margin.left;
+			if ((coords >= 0)&&(coords <= (width))){
+				cursor.attr("transform", "translate(" + coords + "," + (height-30) + ")");
+		  }
+		}
+		
+		function mousedown() {
+			if (iter < 10) {
+				var point = xScale.invert(d3.mouse(this)[0]-margin.left);
+				if (Math.abs(point)<4){
+					values.push(point);
+					stats = calcStats(values);
+					console.log(stats);
+					updateChart();
+				}
+			}
+			else{
+				cursor.append("text").text("No more moves!").attr("fill-opacity", "1").attr("x",0).attr("y",15).attr("font-family", "Arial, sans-serif");
+				cursor.selectAll("text").transition().duration(1000).attr("fill-opacity", "0");
+			}
+		}
+		
+		function restart() {
+			
+			values = generateData();
+					
+			//xScale.domain([d3.min(values),d3.max(values)]);
+			xScale.domain([-4,4]);
+			
+			//use the histogram layout
+			data = d3.layout.histogram().bins(xScale.ticks(10))(values);
+			
+			//update the domain of the scales
+			yScale.domain([0, d3.max(data, function(d) { return d.y; })]);	
+			
+			iter = 0;
+			
+			targetSD = selectTarget(sd(values,function(d){return d ;}));
+			
+			stats = calcStats(values);
+			
+			//Initial display
+			updateChart();
+		}
+		
+	
+		//random normal
+		function rnorm(num_samples, mean, sd) {
+			var func = d3.random.normal(mean,sd);
+			var samples = new Array();
+			for (var i = 0; i < num_samples; i++ ){
+				samples.push(func());
+			}
+			return samples;
+		}
+		
+		function runif(num_samples,low, high){
+			var samples = new Array();
+			for (var i = 0; i < num_samples; i++){
+				samples.push(Math.random()*(high-low)+low);
+			}
+			return samples;
+		}
+		
+		function generateData(){
+			switch( Math.floor(Math.random()*2)){
+				case 0:
+					return rnorm(15,0,1);
+					break;
+				case 1:
+					return runif(15,-4,4);
+					break;					
+			}
+			
+		}
+
+		function calcStats(values){
+			var currentMean = Math.round(d3.mean(values)*100)/100;
+			var currentSD = Math.round(sd(values, function(d) {return d;})*100)/100;
+			var scoreColor = "";
+			if (Math.abs(currentSD-targetSD)<0.1){
+				scoreColor = "green";
+			}
+			else if (Math.abs(currentSD-targetSD)<0.3){
+				scoreColor = "#FF9900";
+			}
+			else{
+				scoreColor = "red";
+			}
+
+			return [
+				{
+					stat: targetSD,
+					name: "target SD",
+					color: "black"
+				},
+				{
+					stat: currentSD,
+					name: "your SD",
+					color: scoreColor
+				}	
+			]
+		}
+		
+		function selectTarget(currentSD){
+			var selection = Math.round((Math.random()*2+0.2)*100)/100;
+			if ((Math.abs(selection-currentSD)>.5)&&(Math.abs(selection-currentSD)<1)){
+				return selection;
+			}
+			else{
+				return selectTarget(currentSD);
+			}
+		}
+		
+		
+		function sd(x, f) {
+			var n = x.length;
+			if (n < 1) return NaN;
+			if (n === 1) return 0;
+			
+			var meanX = mean(x, f);
+			
+			var sumOfSquares = 0;
+			
+			for (var i = 0; i < n; i++){
+				var value = f.call(x, x[i], i);
+				sumOfSquares = sumOfSquares + Math.pow((value - meanX), 2);
+			}
+			
+			return Math.sqrt(sumOfSquares / (n-1));	
+		}
+		
+				//mean
+		function mean(x, f){
+
+			var n = x.length;
+
+			var sum = 0;
+			
+			for (var i = 0; i < n; i++){
+				sum = sum + f.call(x, x[i], i);
+			}
+			
+			return sum / n;
+		}
+		
+		</script>
+	
+    </body>
+</html>     

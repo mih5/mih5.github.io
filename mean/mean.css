@@ -1,0 +1,109 @@
+
+.paragraphText {
+	font-family: sans-serif;
+	font-size: 0.9em;
+}
+
+.chart text{
+	fill: black;
+	font: 14px sans-serif;
+	text-anchor: middle;
+}
+
+#axisLabel{
+	font: 20px sans-serif;
+}
+
+
+.bar rect {
+  fill: steelblue;
+  shape-rendering: crispEdges;
+}
+
+.bar text {
+  fill: #fff;
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 11px;
+}
+
+#heading{
+	margin-left:auto;
+	margin-right:auto;
+	text-align: center;
+	font-family: Arial, sans-serif;
+	font-size: 2em;
+	clear: both;
+}
+
+.lines {
+	fill: steelblue;
+	fill-opacity: 0.5;
+}
+
+.chart{
+	display: block;
+	clear: both;
+	margin-left: auto;
+	margin-right: auto;
+	border: 1px solid LightGrey;
+}
+
+.cursor{
+  fill: none;
+  stroke: blue;
+  pointer-events: none;
+}
+
+.statDisplay{
+	font-family: Arial, sans-serif;
+	font-size: 0.9em;
+}
+
+.moves{
+	font-family: Arial, sans-serif;
+	font-size: 0.9em;
+}
+
+.statlist{
+	list-style-type:none;
+}
+
+#mainbody{
+	position: relative;
+    width: 700px;
+    margin-left: auto ;
+    margin-right: auto ;
+	display: block;
+}
+
+
+#statdiv{
+	display: block;
+	width: 200px;
+	float: right;
+}
+
+#controlpanel{
+	display: block;
+	width: 200px;
+	float: left;
+}
+
+#displayPanel{
+	position: relative;
+	width: 450px;
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}
