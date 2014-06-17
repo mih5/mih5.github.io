@@ -170,7 +170,7 @@
 			//EXIT STEP
 			points.exit().remove();
 			
-			svg.selectAll(".axis").data([]).exit().transition().duration(1200).style("fill-opacity",1e-6).remove();
+			svg.selectAll(".axis").data([]).exit().remove();
 
 			//ENTER STEP
 			//Here we use the enter() selection of the points to create new points
