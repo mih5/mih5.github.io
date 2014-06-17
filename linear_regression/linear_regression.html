@@ -322,13 +322,15 @@
 		
 		function generateData(samples, plotTypeSelect){
 		
+			var sd = Math.random()*2
+		
 			switch(plotTypeSelect){
 				case 0:
-				var X =  rnorm(samples,0,1);
+				var X =  runif(samples,0,Math.random()*10);
 				var Y =  [];
 				var slope = Math.random()*1.5;
 				for ( i = 0; i < X.length; i++){
-					Y[i]=X[i]*slope+rnorm(1,0,.5)[0];
+					Y[i]=X[i]*slope+rnorm(1,0,sd)[0];
 				}
 				var data = [];
 				for (var i = 0; i < X.length; i++){
@@ -341,11 +343,11 @@
 				return data;
 				
 				case 1:
-				var X =  rnorm(samples,0,1);
+				var X =  runif(samples,0,Math.random()*10);
 				var Y =  [];
 				var slope = Math.random()*(-1.5);
 				for ( i = 0; i < X.length; i++){
-					Y[i]=X[i]*slope+rnorm(1,0,.5)[0];
+					Y[i]=X[i]*slope+rnorm(1,0,sd)[0];
 				}
 				var data = [];
 				for (var i = 0; i < X.length; i++){
@@ -358,10 +360,10 @@
 				return data;
 				
 				case 2:
-				var X =  rnorm(samples,0,1);
+				var X =  runif(samples,-Math.random()*10,Math.random()*10);
 				var Y =  [];
 				for ( i = 0; i < X.length; i++){
-					Y[i]=(Math.pow(X[i],2)+rnorm(1,0,.5)[0]);
+					Y[i]=(Math.pow(X[i],2)+rnorm(1,0,sd)[0]);
 				}
 				var data = [];
 				for (var i = 0; i < X.length; i++){
@@ -390,6 +392,14 @@
 			return samples;
 		}
 
+		
+		function runif(num_samples,low, high){
+			var samples = new Array();
+			for (var i = 0; i < num_samples; i++){
+				samples.push(Math.random()*(high-low)+low);
+			}
+			return samples;
+		}
 		
 		//standard deviation - corrected population
 		function sd(x, f) {
