@@ -126,7 +126,7 @@
 			var bar = svg.selectAll(".bar")
 				.data(data);
 				
-			var movesLeft = list0.selectAll(".moves").data([10-iter]);	
+			var movesLeft = list0.selectAll(".moves").data([21-iter]);	
 			
 			var statLines = svg.selectAll(".statLines").data(stats);
 			
@@ -204,7 +204,7 @@
 			if (!intialized){
 				statLines.append("text")
 						.attr("class","statText")
-						.attr("y", function(d,i) {return (1-i)*(-5)+i*35;})
+						.attr("y", function(d,i) {return (1-i)*(-5)+i*39;})
 						.text(function(d) {return d.name + ": " + d.stat;})
 						.attr("fill", function(d) {return d.color;})
 						.attr("fill-opacity", 0)
@@ -221,7 +221,7 @@
 			
 			//EXIT
 			
-			points.exit().remove();
+			points.exit().transition().duration(300).remove();
 			
 			bar.exit().remove();
 			
@@ -237,12 +237,11 @@
 		}
 		
 		function mousedown() {
-			if (iter < 10) {
+			if (iter < 21) {
 				var point = xScale.invert(d3.mouse(this)[0]-margin.left);
 				if (Math.abs(point)<4){
 					values.push(point);
 					stats = calcStats(values);
-					console.log(stats);
 					updateChart();
 				}
 			}
@@ -286,14 +285,63 @@
 			return samples;
 		}
 		
+		function runif(num_samples,low, high){
+			var samples = new Array();
+			for (var i = 0; i < num_samples; i++){
+				samples.push(Math.random()*(high-low)+low);
+			}
+			return samples;
+		}
+		
+		function rnormMixture(num_samples, mean1, mean2, sd1, sd2){
+			var samples = new Array();
+			for (var i = 0; i < num_samples; i++){
+				var selector = Math.floor(Math.random()*2);
+				samples.push(rnorm(1,[mean1,mean2][selector],[sd1,sd2][selector])[0]);
+			}
+			console.log(samples);
+			return samples;
+		}
+		
+		/*
+		Sample from skew-normal dist.
+		Accessed 6/17/2014
+		Adelchi Azzalini 
+		Dipartimento di Scienze Statistiche
+		Università di Padova 
+		http://azzalini.stat.unipd.it/SN/faq-r.html
+		*/
+		
+		function rSkewNorm(num_samples, location, scale, shape){
+			var correlation = (shape && shape / Math.abs(shape))*Math.sqrt(Math.pow(shape,2)/(1+Math.pow(shape,2)));
+			var func = d3.random.normal();
+			var b = Math.sqrt(1-Math.pow(correlation,2));
+			var samples = new Array();
+			for (var i = 0; i < num_samples; i++){
+				var mu0 = func();
+				var v = func();
+				var mu1 = correlation*mu0+b*v;
+				var z = mu1 * Math.pow(-1,+!mu0>=0)
+				samples.push(location+scale*z);
+			}
+			return samples;
+		}
+		
+		
 		function generateData(){
-			switch( Math.floor(Math.random()*2)){
+			switch( Math.floor(Math.random()*3)){
 				case 0:
-					return rnorm(15,0,1);
+					console.log("normal");
+					return rnorm(30,0,1);
 					break;
 				case 1:
-					return rnorm(15,0,1);
-					break;					
+					console.log("uniform");
+					return runif(30,-4,4);
+					break;		
+				case 2:
+					console.log("skew-normal");
+					return rSkewNorm(30,0,1,[4,-4,5,-5,6,-6][Math.floor(Math.random()*6)]);
+					break;
 			}
 			
 		}
@@ -334,6 +382,8 @@
 				return selectTarget(currentMean);
 			}
 		}
+		
+		
 		
 		</script>
 	
