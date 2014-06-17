@@ -110,7 +110,7 @@
 				.attr("font-family", "Arial, sans-serif")
 				.text("Click!");
 		
-		var fulldata = generateData(15,plotType),
+		var fulldata = generateData(30,plotType),
 			data = fulldata.slice(0,20),
 			iter = 0,
 			stats = calcStats(data),
@@ -311,7 +311,7 @@
 		function restart() {
 			cursor.select("text").remove();
 			console.log(plotType);
-			fulldata = generateData(15,plotType);
+			fulldata = generateData(30,plotType);
 			data = fulldata.slice(0,20);
 			iter = 0;
 			updateChart(data);
