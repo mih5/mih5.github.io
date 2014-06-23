@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"><meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+        <title>Mosaic Plot</title>
+		<link type="text/css" rel="stylesheet" href="mosaic_plot.css" />
+        <script src="d3/d3.v3.js"></script>
+    </head>
+    <body>
+        <script>
+		
+		//1. Code that runs when page is loaded
+			
+		//create centered "container" for chart and panels
+		var body = d3.select("body").append("div").attr("id","mainbody");
+		
+		//title
+		body.append("h1").attr("id","heading").text("Mosaic Plot");
+		
+		//define margins and size of chart
+		var margin = {top: 40, right: 60, bottom: 40, left: 30},
+			width = 450 - margin.left - margin.right,
+			height = 400 - margin.top - margin.bottom; 
+			
+		//create the chart
+		var svg0 = body.append("svg")
+					.attr("id","chart")
+					.attr("width", width + margin.left + margin.right)
+					.attr("height", height + margin.top + margin.bottom);
+					
+		var svg = svg0.append("g")
+					.attr("transform", "translate(" + margin.left + "," + margin.top + ")")					
+					.on("touchstart", nozoom)
+					.on("touchmove", nozoom);
+						
+		
+		//group for stat display
+		
+		var displayPanel = body.append("div").attr("id","displayPanel");
+		
+		var statPanel = displayPanel.append("div").attr("id","statdiv");
+					
+		statPanel.append("p").text("Data:").attr("class","paragraphText");
+		var table = statPanel.append("table").attr("id","dataTable").attr("border",1);
+		
+		var controlpanel = displayPanel.append("div").attr("id","controlpanel");
+		
+		//instructional text
+		controlpanel.append("p").text("Instructions:").attr("class","paragraphText");
+		controlpanel.append("p").text("Drag the rectangles to reflect the distribution of X and Xc.").attr("class","paragraphText");
+		
+		//reset button
+		controlpanel.append("input")
+			.attr("type", "button")
+			.attr("value", "Restart" )
+			.attr("onclick", "restart()");
+			
+		
+		//STEP 1 DRAG 
+		
+		var drag1 = d3.behavior.drag()
+			//.origin(function(d) { return {x: d[0], y: d[1]}; })
+			.on("dragstart", dragstarted1)
+			.on("drag", dragged1)
+			.on("dragend", dragended1);	
+			
+		
+		function dragstarted1() {
+		  //this.parentNode.appendChild(this);
+
+		  d3.selectAll("rect").transition()
+			  .ease("elastic")
+			  .duration(500)
+			  .attr("fill-opacity",0.5)
+			  .attr("stroke-width", 12);
+		}
+
+		function dragged1(d) {
+		  d.x = d3.event.x;
+		  d.y = d3.event.y;
+		
+		  d3.select(this).selectAll("rect")
+			.attr("width",function(d,i){return (1-i)*d.x+i*(width-d.x);});
+
+		  d3.select(this).selectAll("#text1")
+			.attr("transform", function(d) {return "translate("+(d.x/2)+","+(height+20)+")";});
+		
+		  d3.select(this).selectAll("#text2")
+			.attr("transform", function(d) {return "translate("+(width-(width-d.x)/2)+","+(height+20)+")";});
+			
+			
+			data2[0].x = d.x;
+			data2[1].x = d.x;
+		}
+		
+		
+		function dragended1() {
+		  d3.selectAll("rect").transition()
+			  .ease("elastic")
+			  .duration(500)
+			  .attr("fill-opacity",1)
+			  .attr("stroke-width", 6);
+			
+			console.log(data1);
+			
+			if( Math.abs(data1[0].x - targetdata1[0].x) < 20){
+				displayText = [{display: "Correct! Now try representing the conditional distributions:", color: "green"}];
+				updateDisplay(displayText);
+				updateChart([],data2, targetdata);
+			}
+			else if (Math.abs(data1[0].x - targetdata1[0].x) < 40){
+				displayText = [{display: "Amost...", color: "#FF9900"}];
+				updateDisplay(displayText);
+			}
+			else {
+				displayText = [{display: "Try again.", color: "red"}];
+				updateDisplay(displayText);
+			}
+			
+		}
+
+		//STEP 2 DRAG
+			
+		var drag2 = d3.behavior.drag()
+			//.origin(function(d) { return {x: d[0], y: d[1]}; })
+			.on("dragstart", dragstarted2)
+			.on("drag", dragged2)
+			.on("dragend", dragended2);	
+				
+				
+		function dragstarted2() {
+		  //this.parentNode.appendChild(this);
+
+		  d3.selectAll("rect").transition()
+			  .ease("elastic")
+			  .duration(500)
+			  .attr("fill-opacity",0.5)
+			  .attr("stroke-width", 12);
+		}
+
+		function dragged2(d) {
+		  d.x = d3.event.x;
+		  d.y = d3.event.y;
+		
+		  d3.select(this).selectAll("rect")
+			.attr("height",function(d,i){return (1-i)*d.y+i*(height-d.y);});
+		}
+		
+		
+		function dragended2() {
+		  d3.selectAll("rect").transition()
+			  .ease("elastic")
+			  .duration(500)
+			  .attr("fill-opacity",1)
+			  .attr("stroke-width", 6);
+ 
+		  if ((Math.abs(data2[0].y-targetdata2[0].y)<20)&&(Math.abs(data2[1].y-targetdata2[1].y)<20)) {
+				displayText = [{display: "Correct!", color: "green"}];
+				updateDisplay(displayText);
+		  }
+		  else if ((Math.abs(data2[0].y-targetdata2[0].y)<40)&&(Math.abs(data2[1].y-targetdata2[1].y)<40)) {
+				displayText = [{display: "Almost...", color: "#FF9900"}];
+				updateDisplay(displayText);
+		  }
+		  else if ((Math.abs(data2[0].y-targetdata2[0].y)<40)||(Math.abs(data2[1].y-targetdata2[1].y)<40)) {
+				displayText = [{display: "Warmer...", color: "#FF9900"}];
+				updateDisplay(displayText);
+		  }
+		  else{
+			displayText = [{display: "Try again.", color: "red"}];
+				updateDisplay(displayText);
+		  }
+ 
+		}
+
+		function nozoom() {
+		  d3.event.preventDefault();
+		}
+		
+		var line = d3.svg.line()
+			.x(function(d) { return d.x; })
+			.y(function(d) { return yScale(d.y); })
+			.interpolate("linear");
+			
+		//----------------------------------------------------START----------------------------------------------------
+
+		//Initial display
+
+		
+		var data1 = [{x: width/2, y: height/2}];
+		var data2 = [{x: width/2, y: height/2},{x: width/2, y: height/2}];
+		
+		var targetdata=generateCounts(),
+			targetdata1 = calcData1(targetdata),
+			targetdata2 = calcData2(targetdata),
+			displayText = [{display: "Click and drag!", color: "black"}];
+
+		console.log(targetdata1);
+			
+		updateChart(data1,[], targetdata);
+
+		updateDisplay(displayText);
+		
+		function updateDisplay(displayText) {
+		
+			//DATA JOIN
+			var display = svg.selectAll(".display")
+			.data(displayText);
+			
+			//UPDATE
+			display.select("text").text(function(d) {return d.display;})
+					.attr("fill", function(d){return d.color;});
+					
+			//ENTER
+			display.enter()
+				.append("g")
+				.attr("class","display")
+				.attr("transform", "translate(5,-10)")
+				.append("text")
+				.text(function(d) {return d.display;})
+				.attr("fill", function(d){return d.color;})
+				.attr("font-family","sans-serif");
+		
+		
+		}
+			
+		function updateChart(data1, data2, targetdata){	
+			
+			var targetdataReformat = [ 
+						[ [], ["X"], ["Xc"] ],
+						[ ["Y"], [targetdata[0][0]], [targetdata[1][0]] ], 
+						[ ["Yc"], [targetdata[0][1]], [targetdata[1][1]] ] 
+			];
+			
+			console.log(targetdataReformat);
+			
+			//DATA JOIN
+			
+			var plot1 = svg.selectAll(".step1")
+				.data(data1);
+					
+			var plot2 = svg.selectAll(".step2")
+				.data(data2);
+					
+			var dataTable = table.selectAll("tr")
+				.data(targetdataReformat);
+				
+			console.log(targetdataReformat);
+					
+			//UPDATE
+			
+			plot1.select("#rect1")
+					.attr("transform", function(d,i){return "translate(0 ,0)";})
+					.attr("width",function(d){return d.x;})
+					.attr("height",height);
+					
+					
+			//ENTER
+			
+			var rows = dataTable.enter().append("tr");
+			
+			var cells = rows.selectAll("td")
+				.data(function(d) {return d;})
+				.enter()
+				.append("td")
+				.text(function(d) {return d;} );
+				
+			
+			var plot1enter = plot1.enter()
+				.append("g")
+				.attr("class","step1")
+				.attr("width", width)
+				.attr("height", height)
+				.call(drag1);
+				
+			var plot2enter = plot2.enter()
+					.append("g")
+					.attr("fill-opacity", 1)
+					.call(drag2);
+				
+			plot1enter.append("g")
+				.attr("id", "text1")
+				.attr("class", "step1")
+				.attr("transform", function(d) {return "translate("+(d.x/2)+","+(height+20)+")";})
+				.append("text")
+				.text("X")
+				.attr("text-anchor","middle")
+				.attr("font-family","sans-serif");
+				
+			plot1enter.append("g")
+				.attr("id", "text2")
+				.attr("class", "step1")
+				.attr("transform", function(d) {return "translate("+(width-(width-d.x)/2)+","+(height+20)+")";})
+				.append("text")
+				.text("Xc")
+				.attr("text-anchor","middle")
+				.attr("font-family","sans-serif");
+				
+			plot1enter.append("rect")
+					.attr("class","step1")
+					.attr("transform", function(d,i){return "translate(0 ,0)";})
+					.attr("width",function(d){return d.x;})
+					.attr("height",height)
+					.attr("fill", "purple")
+					.attr("fill-opacity", 0)
+					.attr("stroke", "white")
+					.attr("stroke-width", 6);
+					
+			plot1enter.append("rect")
+					.attr("class","step1")
+					.attr("transform", function(d,i){return "translate("+width+",0) scale(-1,1)";})
+					.attr("width",function(d){return width-d.x;})
+					.attr("height",height)
+					.attr("fill", "purple")
+					.attr("fill-opacity", 0)
+					.attr("stroke", "white")
+					.attr("stroke-width", 6);		
+			
+			plot2enter.append("g")
+				.attr("class","text3")
+				.attr("class", "step2")
+				.attr("transform", function(d,i) {return "translate("+(width+10)+","+((1-i)*100+i*(200))+")";})
+				.append("text")
+				.text(function(d,i){if(i==0){return "Y";} else{return "Yc";}})
+				.attr("font-family","sans-serif");
+				
+			plot2enter.append("g")
+				.attr("class", "text4")
+				.attr("class", "step2")
+				.attr("transform", function(d,i) {return "translate("+((1-i)*(d.x/2)+i*(width-(width-d.x)/2))+","+(height+20)+")";})
+				.append("text")
+				.text(function(d,i){if(i==0){return "X";} else{return "Xc";}})
+				.attr("text-anchor","middle")
+				.attr("font-family","sans-serif");
+					
+			plot2enter.append("rect")
+					.attr("class","step2")
+					.attr("transform", function(d,i){return "translate("+(i*width)+",0) scale("+((1-i)*1+i*(-1))+",1)";})
+					.attr("width",function(d,i){return (1-i)*d.x+i*(width-d.x);})
+					.attr("height",function(d){return d.y;})
+					.attr("fill", "blue")
+					.attr("fill-opacity", 0)
+					.attr("stroke", "white")
+					.attr("stroke-width", 6);
+				
+			plot2enter.append("rect")
+					.attr("class","step2")
+					.attr("transform", function(d,i){return "translate("+(i*width)+","+height+") scale("+((1-i)*1+i*(-1))+",-1)";})
+					.attr("width",function(d,i){return (1-i)*d.x+i*(width-d.x);})
+					.attr("height",function(d){return height-d.y;})
+					.attr("fill", "red")
+					.attr("fill-opacity", 0)
+					.attr("stroke", "white")
+					.attr("stroke-width", 6);
+					
+			plot2.selectAll(".step2").transition().duration(900).attr("fill-opacity",1);
+			
+			plot1.selectAll(".step1").transition().duration(300).attr("fill-opacity",1);
+					
+			
+			//EXIT
+			
+			plot1.exit().transition().duration(900).attr("fill-opacity",0).remove();
+					
+			plot2.exit().transition().duration(900).attr("fill-opacity",0).remove();
+					
+					
+		}
+		
+		function mosaic() {
+			var g = d3.select(this);
+		
+			
+		}
+		
+		function restart(){
+			
+			history.go(0);
+			/*
+		    data1 = [{x: width/2, y: height/2}];
+			data2 = [{x: width/2, y: height/2},{x: width/2, y: height/2}];
+		
+			targetdata=generateCounts();
+			targetdata1 = calcData1(targetdata);
+			targetdata2 = calcData2(targetdata);
+			displayText = [{display: "Click and drag!", color: "black"}];
+			
+			updateDisplay(displayText);
+			updateChart(data1,[], targetdata);
+			*/
+
+		}
+		
+		
+		function generateCounts(){
+			return [[Math.ceil(Math.random()*10), Math.ceil(Math.random()*10)], [Math.ceil(Math.random()*10), Math.ceil(Math.random()*10)]];
+		}
+		
+		
+		function calcData1(data){
+			var sumX = data[0][0]+data[0][1];
+			var sumXc = data[1][0]+data[1][1];
+			return [ {x: sumX/(sumX+sumXc)*width, y:100} ];
+		}
+		
+		function calcData2(data){
+			var sumX = data[0][0]+data[0][1];
+			var sumXc = data[1][0]+data[1][1]
+			return [ {x: sumX/(sumX+sumXc)*width, y: height*data[0][0]/sumX}, {x: sumX/(sumX+sumXc)*width, y: height*data[1][0]/sumXc},];
+		}
+		
+
+		
+		//---------------------------------------------------UTILITY FUNCTIONS-----------------------------------------
+		
+		
+		</script>
+	
+    </body>
+</html>     
