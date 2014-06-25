@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Histogram</title>
+		<link type="text/css" rel="stylesheet" href="histogram.css" />
+        <script src="d3/d3.min.js"></script>
+    </head>
+    <body>
+        <script>
+		
+		//1. Code that runs when page is loaded
+			
+		//create centered "container" for chart and panels
+		var body = d3.select("body").append("div").attr("id","mainbody");
+		
+		//title
+		body.append("h1").attr("id","heading").text("Histogram");
+		
+		//define margins and size of chart
+		var margin = {top: 20, right: 30, bottom: 30, left: 40},
+			width = 450 - margin.left - margin.right,
+			height = 400 - margin.top - margin.bottom;
+			
+		//create the chart
+		var svg0 = body.append("svg")
+					.attr("class","chart")
+					.attr("width", width + margin.left + margin.right)
+					.attr("height", height + margin.top + margin.bottom)
+					.on("mousemove", mousemove)
+					.on("mousedown", mousedown);
+					
+		var svg = svg0.append("g")
+					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+					
+		var histline = svg.append("rect").attr("transform", "translate(0," + (height-30) + ")").attr("height",1).attr("width",width);
+
+		//group for stat display
+		
+		var displayPanel = body.append("div").attr("id","displayPanel");
+		
+		var statPanel = displayPanel.append("div").attr("id","statdiv");
+
+		var list0 = statPanel.append("ul")
+								.attr("class", "statlist");
+			
+		var list = statPanel.append("ul")
+								.attr("class", "statlist");
+	
+		
+		var controlpanel = displayPanel.append("div").attr("id","controlpanel");
+		
+		//instructional text
+		controlpanel.append("p").text("Click the plot to add points and change the histogram.").attr("class","paragraphText");
+		controlpanel.append("p").text("Select a distribution to sample:").attr("class","paragraphText");
+		
+		var plotType = 0;
+		
+		var buttonNames = [ "Normal (SD 1)",
+			"Normal (SD 0.5)",
+			"Uniform",
+			"Bimodal",
+			"Skewed right",
+			"Skewed left",
+			"Build your own!"]
+		
+		function change() {
+			plotType = selection.property('selectedIndex');
+		}
+		
+		var selection = controlpanel.append("select").on("change", change);
+		var options  = selection.selectAll('option').data(buttonNames);
+		options.enter().append("option").text(function (d){return d;});
+		
+		//reset button
+		controlpanel.append("input")
+			.attr("type", "button")
+			.attr("value", "Restart" )
+			.attr("onclick", "restart()");
+		
+		//initialize scales for chart
+		var xScale = d3.scale.linear()
+			.range([0,width]);
+		
+		var yScale = d3.scale.linear()
+			.range([(height	),75]);
+			
+		var values = generateData(plotType),
+			iter = 0,
+			stats = calcStats(values),
+			intialized = false;
+			
+	
+		//----------------------------------------------------START----------------------------------------------------
+
+		
+		//xScale.domain([d3.min(values),d3.max(values)]);
+		xScale.domain([-4,4]);
+		
+		
+		//create cursor
+		
+		var cursor = svg.append("g").attr("transform", "translate(-100," + (height-30) + ")");
+		
+		cursor.append("rect")
+				.attr("width", 3)
+				.attr("height", 30)
+				.attr("fill-opacity", 0.5);
+			
+		
+		//Initial display
+		updateChart();
+		
+		var cursor2 = svg.append("g").attr("transform", "translate(-100,-100)");
+		
+		cursor2.append("text")
+				.attr("x", 6)
+				.attr("y", -6)
+				.attr("font-family", "Arial, sans-serif")
+				.text("Click!");
+		
+		
+		
+		intialized = true;
+		
+		
+		function updateChart(){
+		
+			iter ++;
+
+				
+			//use the histogram layout
+			var data = d3.layout.histogram().bins(xScale.ticks(10))(values);
+		
+			//update the domain of the scales
+			yScale.domain([0, d3.max(data, function(d) { return d.y; })]);
+		
+				
+			//define X axis
+			var xAxis = d3.svg.axis()
+				.scale(xScale)
+				.orient("bottom");
+				
+			//DATA JOIN
+			var points = svg.selectAll(".points").data(values);
+				
+			var bar = svg.selectAll(".bar")
+				.data(data);
+				
+			var movesLeft = list0.selectAll(".moves").data([values.length]);	
+			
+			var statLines = svg.selectAll(".statLines").data(stats.slice(0,2));
+			
+			var sdLine = svg.selectAll(".sdLine").data(stats.slice(2,3));
+			
+			//UPDATE
+			
+			points.transition().duration(300)
+				.attr("transform",function(d){return "translate("+xScale(d)+","+(height-15)+")";});
+				
+			bar.transition().duration(300)
+					.attr("transform", function(d) {return "translate(" + xScale(d.x) + "," + (yScale(d.y)-30) + ")"; })
+				.select("rect")
+					.attr("x", 1)
+					.attr("width", xScale(data[0].dx-4) - 1)
+					.attr("height", function(d) { return height - yScale(d.y); });
+					
+			movesLeft.text(function(d) {return "Number of points: " + d;});
+			
+			statLines.transition().duration(300).attr("transform", function(d,i) {return "translate(" + (xScale(d.stat)) + ","+(i*28)+")";})
+				.select("rect")
+					.attr("fill", function(d) {return d.color;});
+				
+			statLines.select(".statText").text(function(d) {return d.name + ": " + d.stat;})
+					.attr("fill", function(d) {return d.color;});
+					
+			
+			sdLine.transition().duration(300).attr("transform", function(d,i) {return "translate(" + 0 + ","+ (i*30) +")";})
+				.select("rect")
+					.attr("width", function(d) {return xScale(d.stat-4);})
+					.attr("fill", function(d) {return d.color;});
+				
+			sdLine.select(".sdText").text(function(d) {return d.name + ": " + d.stat;})
+					.attr("fill", function(d) {return d.color;});
+			
+					
+				
+			//ENTER
+			
+			
+			bar.enter().append("g")
+					.attr("class","bar")
+					.attr("transform", function(d) {return "translate(" + xScale(d.x) + "," + (height-30) + ")"; })
+				.append("rect")
+					.attr("x", 1)
+					.attr("width", xScale(data[0].dx-4) - 1)
+					.attr("height", function(d) { return 0; });
+					
+				
+			bar.transition().duration(300)
+					.attr("transform", function(d) {return "translate(" + xScale(d.x) + "," + (yScale(d.y)-30) + ")"; })
+				.select("rect")
+					.attr("height", function(d) { return height - yScale(d.y); })
+					.attr("width", xScale(data[0].dx-4) - 1);
+			
+			points.enter().append("g")
+					.attr("class","points")
+					.attr("transform",function(d){return "translate("+xScale(d)+","+(height-15)+")";})
+				.append("circle")
+					.attr("fill",function(d) {return d.color})
+					.attr("fill-opacity",0)
+					.attr("r",5);
+							
+			points.selectAll("circle")
+					.transition().duration(300)
+					.attr("fill", "red")
+					.attr("fill-opacity",0.25);
+								
+			movesLeft.enter()
+				.append("li")
+				.attr("class", "moves")
+				.text(function(d) { return "Number of points: " + d;});
+				
+			//lines for displaying mean and median
+			statLines.enter()
+				.append("g")
+					.attr("class","statLines")
+					.attr("transform", function(d,i) {return "translate(" + (xScale(d.stat)) + ","+(i*28)+")";})
+				.append("rect")
+					.attr("width", 1.5)
+					.attr("height", 10)
+					.attr("fill", function(d) {return d.color;})
+					.attr("fill-opacity", 0)
+						.transition().duration(300)
+						.attr("fill-opacity", 1);
+			
+			//text for lines
+			if (!intialized){
+				statLines.append("text")
+						.attr("class","statText")
+						.attr("y", function(d,i) {return (-2);})
+						.text(function(d) {return d.name + ": " + d.stat;})
+						.attr("fill", function(d) {return d.color;})
+						.attr("fill-opacity", 0)
+						.transition().duration(300)
+						.attr("fill-opacity", 1);
+			}	
+			
+			sdLine.enter()
+				.append("g")
+					.attr("class","sdLine")
+					.attr("transform", function(d,i) {return "translate(" + 0 + ","+(i*30)+")";})
+				.append("rect")
+					.attr("y", 2)
+					.attr("width", function(d) {return xScale(d.stat-4);})
+					.attr("height", 1.5)
+					.attr("fill", function(d) {return d.color;})
+					.attr("fill-opacity", 0)
+						.transition().duration(300)
+						.attr("fill-opacity", 1);
+					
+			if (!intialized){
+				sdLine.append("text")
+						.attr("class","sdText")
+						.attr("x", 27)
+						.attr("y", -2)
+						.text(function(d) {return d.name + ": " + d.stat;})
+						.attr("fill", function(d) {return d.color;})
+						.attr("fill-opacity", 0)
+						.transition().duration(300)
+						.attr("fill-opacity", 1);
+			}
+				
+			svg.append("g")
+			.attr("class","axis")
+			.attr("transform", "translate(0," + height + ")")
+			.transition()
+			.duration(750)
+			.call(xAxis);
+			
+			//EXIT
+			
+			points.exit().transition().duration(300).remove();
+			
+			bar.exit().remove();
+			
+
+	
+		}
+		
+		function mousemove() {
+			var coords = d3.mouse(this)[0] - margin.left;
+			if ((coords >= 0)&&(coords <= (width))){
+				cursor.attr("transform", "translate(" + coords + "," + (height-30) + ")");
+		  }
+		   cursor2.attr("transform", "translate(" + [d3.mouse(this)[0]-margin.left, d3.mouse(this)[1]-margin.top] + ")");
+		}
+		
+		function mousedown() {
+		
+			var point = xScale.invert(d3.mouse(this)[0]-margin.left);
+			if (Math.abs(point)<4){
+				values.push(point);
+				stats = calcStats(values);
+				updateChart();
+			
+			}
+			
+			cursor2.select("text").remove();
+		}
+		
+		function restart() {
+			
+			values = generateData(plotType);
+					
+			//xScale.domain([d3.min(values),d3.max(values)]);
+			xScale.domain([-4,4]);
+			
+			//use the histogram layout
+			data = d3.layout.histogram().bins(xScale.ticks(10))(values);
+			
+			//update the domain of the scales
+			yScale.domain([0, d3.max(data, function(d) { return d.y; })]);	
+			
+			iter = 0;
+			
+			stats = calcStats(values);
+			
+			//Initial display
+			updateChart();
+		}
+		
+	
+		//random normal
+		function rnorm(num_samples, mean, sd) {
+			var func = d3.random.normal(mean,sd);
+			var samples = new Array();
+			for (var i = 0; i < num_samples; i++ ){
+				samples.push(func());
+			}
+			return samples;
+		}
+		
+		function runif(num_samples,low, high){
+			var samples = new Array();
+			for (var i = 0; i < num_samples; i++){
+				samples.push(Math.random()*(high-low)+low);
+			}
+			return samples;
+		}
+		
+		function rnormMixture(num_samples, mean1, mean2, sd1, sd2){
+			var samples = new Array();
+			for (var i = 0; i < num_samples; i++){
+				var selector = Math.floor(Math.random()*2);
+				samples.push(rnorm(1,[mean1,mean2][selector],[sd1,sd2][selector])[0]);
+			}
+			console.log(samples);
+			return samples;
+		}
+		
+		/*
+		Sample from skew-normal dist.
+		Accessed 6/17/2014
+		Adelchi Azzalini 
+		Dipartimento di Scienze Statistiche
+		Università di Padova 
+		http://azzalini.stat.unipd.it/SN/faq-r.html
+		*/
+		
+		function rSkewNorm(num_samples, location, scale, shape){
+			var corr = (shape && shape)/Math.abs(shape)*Math.sqrt(Math.pow(shape,2)/(1+Math.pow(shape,2)));
+			var func = d3.random.normal();
+			var b = Math.sqrt(1-Math.pow(corr,2));
+			var samples = new Array();
+			for (var i = 0; i < num_samples; i++){
+				var mu0 = func();
+				var v = func();
+				var mu1 = corr*mu0+b*v;
+				if (mu0>= 0){
+					var z = mu1;
+				}
+				else{
+					var z = -mu1;
+				}
+				samples.push(location+scale*z);
+			}
+			return samples;
+		}
+		
+		
+		function generateData(plotType){
+			switch( plotType){
+				case 0:
+					return rnorm(20,0,1);
+					break;
+				case 1:
+					return rnorm(20,0,0.5);
+					break;
+				case 2:
+					return runif(20,-4,4);
+					break;
+				case 3:
+					return rnormMixture(30,2,-2,.4,.4);
+					break;		
+				case 4:
+					return rSkewNorm(30,-1,1.5,10);
+					break;
+				case 5:
+					return rSkewNorm(30,1,1.5,-10);
+					break;
+				case 6:
+					console.log("build your own");
+					return [0];
+					break;
+			}
+			
+		}
+
+		function calcStats(values){
+			var currentMedian = Math.round(d3.median(values)*100)/100;
+			var currentMean = Math.round(d3.mean(values)*100)/100;
+			var currentSD = Math.round(sd(values, function(d) {return d;})*100)/100;
+			return [
+				{
+					stat: currentMedian,
+					name: "median",
+					color: "black"
+				},
+				{
+					stat: currentMean,
+					name: "mean",
+					color: "black"
+				},
+				{
+					stat: currentSD,
+					name: "SD",
+					color: "black"
+				}	
+			]
+		}
+		
+		//Utility functions
+		
+		
+		function sd(x, f) {
+			var n = x.length;
+			if (n < 1) return NaN;
+			if (n === 1) return 0;
+			var meanX = mean(x, f);
+			var sumOfSquares = 0;
+			for (var i = 0; i < n; i++){
+				var value = f.call(x, x[i], i);
+				sumOfSquares = sumOfSquares + Math.pow((value - meanX), 2);
+			}
+			return Math.sqrt(sumOfSquares / (n-1));	
+		}
+		
+				//mean
+		function mean(x, f){
+			var n = x.length;
+			var sum = 0;
+			for (var i = 0; i < n; i++){
+				sum = sum + f.call(x, x[i], i);
+			}	
+			return sum / n;
+		}
+		
+		</script>
+	
+    </body>
+</html>     

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Statistics Applets</title>
+		<link type="text/css" rel="stylesheet" href="styling.css" />
+        <script src="d3/d3.min.js"></script>
+    </head>
+    <body>
+        <script>
+		
+		//1. Code that runs when page is loaded
+			
+		//create centered "container" for chart and panels
+		var body = d3.select("body").append("div").attr("id","mainbody");
+		
+		//title
+		body.append("h1").attr("id","heading").text("Statistics Applets");
+		
+		var column1 = body.append("div").attr("id","col1");
+		var column2 = body.append("div").attr("id","col2");
+		
+		var applets = [
+			{
+				heading: "One Variable",
+				children: [
+					{name: "Histogram", descr: "mean, median, SD", link: "histogram/histogram.html", image: "histogramImage.PNG" },
+					{name: "Histogram", descr: "mean, median, SD", link: "histogram/histogram.html", image: "histogramImage300x200.PNG" }
+				]
+			},
+			{
+				heading: "Two Variables",
+				children: [
+					{name: "Mosaic Plot", descr: "two categorical", link: "mosaic_plot/mosaic_plot.html", image: "mosaic300x200.PNG" }
+				]
+			}
+		]
+		
+		var sections = column1.selectAll(".section").data(applets);
+		
+		sections.enter()
+			.append("div")
+				.attr("class","section");
+			
+		sections.append("h2").text(function(d) {return d.heading;}).attr("class","paragraphText");
+		
+		var applets = sections.selectAll(".applet").data(function(d) {return d.children;});
+		
+		var appEnter = applets.enter()
+			.append("a")
+			.attr("class","applet")
+			.attr("href", function(d) {return d.link;})
+			.append("svg")
+				.attr("class","appletSVG")
+				.on("mouseover", mouseover)
+				.on("mouseout", mouseout);
+				
+				
+		appEnter.append("image")
+				.attr("xlink:href", function(d) {return d.image;})
+				.attr("height", 100)
+				.attr("width", 150)
+				.attr("opacity", 0.5);
+				
+		appEnter.append("text")
+				.attr("y",30)
+				.attr("x",10)
+				.text(function(d) {return d.name;})
+				.attr("class","appletText");
+				
+		appEnter.append("text")
+				.attr("y",50)
+				.attr("x",10)
+				.text(function(d) {return d.descr;})
+				.attr("class","appletTextSmall");
+		
+		function mouseover(){
+			d3.select(this).select("image").attr("opacity", 1);
+			d3.select(this).selectAll("text").attr("opacity", 0);
+		}
+		
+		function mouseout(){
+			d3.select(this).select("image").attr("opacity", 0.5);
+			d3.select(this).selectAll("text").attr("opacity", 1);
+		}
+
+
+		</script>
+	
+    </body>
+</html>     

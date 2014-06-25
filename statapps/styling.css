@@ -1,0 +1,57 @@
+
+.paragraphText {
+	font-family: sans-serif;
+}
+
+#heading{
+	margin-left:auto;
+	margin-right:auto;
+	text-align: center;
+	font-family: Arial, sans-serif;
+	font-size: 2em;
+	clear: both;
+}
+
+
+#mainbody{
+    width: 700px;
+    margin-left: auto ;
+    margin-right: auto ;
+}
+
+#col1{
+	width: 350px;
+    float:left; 
+}
+
+#col2{	
+    overflow: hidden; 
+}
+
+.applet {
+	text-decoration: none;
+}
+
+.appletSVG {
+	width: 150px;
+	height: 100px;
+	border: 1px solid gray;
+	margin-left: 10px;
+	text-decoration: none;
+}
+
+.appletText {
+	fill: black;
+	stroke: white;
+	stroke-width: .5;
+	font-family: sans-serif;
+	font-size: 25px;
+}
+
+.appletTextSmall {
+	fill: black;
+	stroke: white;
+	stroke-width: .2;
+	font-family: sans-serif;
+	font-size: 15px;
+}
