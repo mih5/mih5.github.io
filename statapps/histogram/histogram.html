@@ -28,7 +28,9 @@
 					.attr("width", width + margin.left + margin.right)
 					.attr("height", height + margin.top + margin.bottom)
 					.on("mousemove", mousemove)
-					.on("mousedown", mousedown);
+					.on("mousedown", mousedown)
+					.on("touchstart", nozoom)
+					.on("touchmove", nozoom);
 					
 		var svg = svg0.append("g")
 					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -464,6 +466,10 @@
 				sum = sum + f.call(x, x[i], i);
 			}	
 			return sum / n;
+		}
+		
+		function nozoom() {
+		  d3.event.preventDefault();
 		}
 		
 		</script>
