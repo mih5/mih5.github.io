@@ -36,43 +36,62 @@
 			}
 		]
 		
-		var sections = column1.selectAll(".section").data(applets);
+		var applets2 = [
+			{
+				heading: "Association",
+				children: [
+					{name: "Correlation", descr: "correlation game", link: "correlation_game/correlationgame.html", image: "correlation300x200.png" },
+					{name: "Regression", descr: "Residuals", link: "linear_regression/linear_regression.html", image: "linear300x200.png" }
+				]
+			}
+		]
 		
-		sections.enter()
-			.append("div")
-				.attr("class","section");
+		updateColumn(column1, applets);
+		
+		updateColumn(column2, applets2);
+		
+		function updateColumn(column, data) {
 			
-		sections.append("h2").text(function(d) {return d.heading;}).attr("class","paragraphText");
+			var sections = column.selectAll(".section").data(data);
+			
+			sections.enter()
+				.append("div")
+					.attr("class","section");
+				
+			sections.append("h2").text(function(d) {return d.heading;}).attr("class","paragraphText");
+			
+			var applets = sections.selectAll(".applet").data(function(d) {return d.children;});
+			
+			var appEnter = applets.enter()
+				.append("a")
+				.attr("class","applet")
+				.attr("href", function(d) {return d.link;})
+				.append("svg")
+					.attr("class","appletSVG")
+					.on("mouseover", mouseover)
+					.on("mouseout", mouseout);
+					
+					
+			appEnter.append("image")
+					.attr("xlink:href", function(d) {return d.image;})
+					.attr("height", 100)
+					.attr("width", 150)
+					.attr("opacity", 0.5);
+					
+			appEnter.append("text")
+					.attr("y",30)
+					.attr("x",10)
+					.text(function(d) {return d.name;})
+					.attr("class","appletText");
+					
+			appEnter.append("text")
+					.attr("y",50)
+					.attr("x",10)
+					.text(function(d) {return d.descr;})
+					.attr("class","appletTextSmall");
+			
+		}
 		
-		var applets = sections.selectAll(".applet").data(function(d) {return d.children;});
-		
-		var appEnter = applets.enter()
-			.append("a")
-			.attr("class","applet")
-			.attr("href", function(d) {return d.link;})
-			.append("svg")
-				.attr("class","appletSVG")
-				.on("mouseover", mouseover)
-				.on("mouseout", mouseout);
-				
-				
-		appEnter.append("image")
-				.attr("xlink:href", function(d) {return d.image;})
-				.attr("height", 100)
-				.attr("width", 150)
-				.attr("opacity", 0.5);
-				
-		appEnter.append("text")
-				.attr("y",30)
-				.attr("x",10)
-				.text(function(d) {return d.name;})
-				.attr("class","appletText");
-				
-		appEnter.append("text")
-				.attr("y",50)
-				.attr("x",10)
-				.text(function(d) {return d.descr;})
-				.attr("class","appletTextSmall");
 		
 		function mouseover(){
 			d3.select(this).select("image").attr("opacity", 1);

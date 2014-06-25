@@ -5,24 +5,9 @@
 }
 
 .chart text{
-	fill: black;
-	font: 14px sans-serif;
+	fill: white;
+	font: 10px sans-serif;
 	text-anchor: middle;
-}
-
-#axisLabel{
-	font: 20px sans-serif;
-}
-
-
-.bar rect {
-  fill: steelblue;
-  shape-rendering: crispEdges;
-}
-
-.bar text {
-  fill: #fff;
-  font: 10px sans-serif;
 }
 
 .axis path,
@@ -51,7 +36,7 @@
 	fill-opacity: 0.5;
 }
 
-.chart{
+#chart{
 	display: block;
 	clear: both;
 	margin-left: auto;
