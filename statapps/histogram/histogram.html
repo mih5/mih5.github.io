@@ -27,8 +27,6 @@
 					.attr("class","chart")
 					.attr("width", width + margin.left + margin.right)
 					.attr("height", height + margin.top + margin.bottom)
-					.on("touchstart", nozoom)
-					.on("touchmove", nozoom)
 					.on("mousemove", mousemove)
 					.on("mousedown", mousedown);
 					
@@ -468,9 +466,6 @@
 			return sum / n;
 		}
 		
-		function nozoom() {
-		  d3.event.preventDefault();
-		}
 		
 		</script>
 	
