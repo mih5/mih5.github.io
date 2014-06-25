@@ -27,10 +27,10 @@
 					.attr("class","chart")
 					.attr("width", width + margin.left + margin.right)
 					.attr("height", height + margin.top + margin.bottom)
-					.on("mousemove", mousemove)
-					.on("mousedown", mousedown)
 					.on("touchstart", nozoom)
-					.on("touchmove", nozoom);
+					.on("touchmove", nozoom)
+					.on("mousemove", mousemove)
+					.on("mousedown", mousedown);
 					
 		var svg = svg0.append("g")
 					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
