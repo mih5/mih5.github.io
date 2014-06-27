@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Boxplot</title>
+		<link type="text/css" rel="stylesheet" href="boxplot.css" />
+        <script src="d3/d3.min.js"></script>
+		<script src="box.js"></script>
+    </head>
+    <body>
+        <script>
+		
+		//1. Code that runs when page is loaded
+			
+		//create centered "container" for chart and panels
+		var body = d3.select("body").append("div").attr("id","mainbody");
+		
+		//title
+		body.append("h1").attr("id","heading").text("Boxplots");
+		
+		//define margins and size of chart
+		var margin = {top: 10, right: 10, bottom: 20, left: 10},
+			width = 450 - margin.left - margin.right,
+			height = 150 - margin.top - margin.bottom;
+		
+		var plotType = 0;
+				
+		var min = Infinity,
+			max = -Infinity;
+
+		//generate data
+		var data = [generateData(plotType),generateData(plotType),generateData(plotType)],
+			iter = 0;
+			
+		var chart = d3.box()
+			.width(width)
+			.height(height)
+			.whiskers(iqr(1.5));
+		
+		var plots = body.selectAll("svg")
+				.data(data)
+			.enter()
+			.append("svg")
+					.attr("class","chart")
+					.attr("width", width + margin.left + margin.right)
+					.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+				.call(chart);
+		
+		function restart() {
+			// for each datum in data, call resample
+			// which maps new samples to the datum
+			plots.datum(resample).call(chart);
+			iter = 0;
+		
+		}
+
+		//miscellania			
+
+		//group for stat display
+		
+		var displayPanel = body.append("div").attr("id","displayPanel");
+		
+		var statPanel = displayPanel.append("div").attr("id","statdiv");
+			
+		var controlpanel = displayPanel.append("div").attr("id","controlpanel");
+		
+		//instructional text
+		controlpanel.append("p").text("Select a distribution to sample:").attr("class","paragraphText");
+		
+		var citation = statPanel.append("p")
+				.text("Adapted from Mike Bostock's ")
+				.attr("class","paragraphText");
+				
+		citation.append("a")
+				.attr("href","http://bl.ocks.org/mbostock/4061502")
+				.text("boxplot");
+				
+		citation.append("text")
+				.text(" and ");
+				
+		citation.append("a")
+				.attr("href","http://bl.ocks.org/mbostock/3048450")
+				.text("histogram");
+				
+		citation.append("text")
+				.text(" examples.");
+		
+		var buttonNames = [ "Normal (SD 1)",
+			"Normal (SD 0.5)",
+			"Uniform",
+			"Bimodal",
+			"Skewed right",
+			"Skewed left"]
+		
+		function change() {
+			plotType = selection.property('selectedIndex');
+		}
+		
+		var selection = controlpanel.append("select").on("change", change);
+		var options  = selection.selectAll('option').data(buttonNames);
+		options.enter().append("option").text(function (d){return d;});
+		
+		//reset button
+		controlpanel.append("input")
+			.attr("type", "button")
+			.attr("value", "Restart" )
+			.attr("onclick", "restart()");
+
+
+		//----------------------------------------------DATA GENERATION---------------------------------------------
+	
+		//random normal
+		function rnorm(num_samples, mean, sd) {
+			var func = d3.random.normal(mean,sd);
+			var samples = new Array();
+			for (var i = 0; i < num_samples; i++ ){
+				samples.push(func());
+			}
+			return samples;
+		}
+		
+		function runif(num_samples,low, high){
+			var samples = new Array();
+			for (var i = 0; i < num_samples; i++){
+				samples.push(Math.random()*(high-low)+low);
+			}
+			return samples;
+		}
+		
+		function rnormMixture(num_samples, mean1, mean2, sd1, sd2){
+			var samples = new Array();
+			for (var i = 0; i < num_samples; i++){
+				var selector = Math.floor(Math.random()*2);
+				samples.push(rnorm(1,[mean1,mean2][selector],[sd1,sd2][selector])[0]);
+			}
+			return samples;
+		}
+		
+		/*
+		Sample from skew-normal dist.
+		Accessed 6/17/2014
+		Adelchi Azzalini 
+		Dipartimento di Scienze Statistiche
+		Università di Padova 
+		http://azzalini.stat.unipd.it/SN/faq-r.html
+		*/
+		
+		function rSkewNorm(num_samples, location, scale, shape){
+			var corr = (shape && shape)/Math.abs(shape)*Math.sqrt(Math.pow(shape,2)/(1+Math.pow(shape,2)));
+			var func = d3.random.normal();
+			var b = Math.sqrt(1-Math.pow(corr,2));
+			var samples = new Array();
+			for (var i = 0; i < num_samples; i++){
+				var mu0 = func();
+				var v = func();
+				var mu1 = corr*mu0+b*v;
+				if (mu0>= 0){
+					var z = mu1;
+				}
+				else{
+					var z = -mu1;
+				}
+				samples.push(location+scale*z);
+			}
+			return samples;
+		}
+		
+		
+		function generateData(plotType){
+			switch( plotType){
+				case 0:
+					return rnorm(100,0,1);
+					break;
+				case 1:
+					return rnorm(50,0,0.5);
+					break;
+				case 2:
+					return runif(50,-4,4);
+					break;
+				case 3:
+					return rnormMixture(50,2,-2,.4,.4);
+					break;		
+				case 4:
+					return rSkewNorm(50,-1,1.5,10);
+					break;
+				case 5:
+					return rSkewNorm(50,1,1.5,-10);
+					break;
+			}
+			
+		}
+		
+		function resample(d) {
+			//Need to map data
+			if (!d.resampler) d.resampler = resampler(d);
+			return d.map(resampler(d));
+		}
+		
+		function resampler(d){
+			//accessing the global variable plotType is bad form
+			switch( plotType){
+				case 0:
+					return function(d) { return rnorm(1,0,1);};
+					break;
+				case 1:
+					return function(d) {return rnorm(1,0,0.5);};
+					break;
+				case 2:
+					return function(d) {return runif(1,-4,4);};
+					break;
+				case 3:
+					return function(d) {return rnormMixture(1,2,-2,.4,.4);};
+					break;		
+				case 4:
+					return function(d) {return rSkewNorm(1,-1,1.5,10);};
+					break;
+				case 5:
+					return function(d) {return rSkewNorm(1,1,1.5,-10);};
+					break;
+			}
+		}
+
+		// Returns a function to compute the interquartile range.
+		// When k =1, returns interquartile range
+		// When k = 1.5, returns whiskers
+		function iqr(k) {
+		  return function(d, i) {
+			var q1 = d.quartiles[0],
+				q3 = d.quartiles[2],
+				iqr = (q3 - q1) * k,
+				i = -1,
+				j = d.length;
+			while (d[++i] < q1 - iqr);
+			while (d[--j] > q3 + iqr);
+			return [i, j];
+		  };
+		}
+		
+		</script>
+	
+    </body>
+</html>     
