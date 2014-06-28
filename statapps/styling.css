@@ -12,20 +12,21 @@
 	clear: both;
 }
 
-
-#mainbody{
+.mainbody{
     width: 700px;
     margin-left: auto ;
     margin-right: auto ;
 }
 
 #col1{
-	width: 350px;
+	width: 700px;
     float:left; 
 }
 
-#col2{	
-    overflow: hidden; 
+#infoText{	
+	width: 450px;
+	font-family: sans-serif;
+	font-size: 0.75em;
 }
 
 .applet {
