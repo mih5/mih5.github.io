@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"><meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+        <title>Conditional Probability Tree</title>
+		<link type="text/css" rel="stylesheet" href="cond_prob.css" />
+        <script src="d3/d3.min.js"></script>
+		<script src="probabilityTree.js"></script>
+		<script src="slider.js"></script>
+    </head>
+    <body>
+        <script>
+		
+		//1. Code that runs when page is loaded
+			
+		//create centered "container" for chart and panels
+		var body = d3.select("body").append("div").attr("id","mainbody");
+		
+		//title
+		body.append("h1").attr("id","heading").text("Conditional Probability Tree");
+		
+		//DATA
+				
+		var treeData = [
+		
+			{
+				"name": "",
+				"value": 0,
+				"children": [
+					{
+						"name": "A",
+						"parent": "",
+						"value": 20,
+						"probability": 1/2,
+						"children": [
+							{
+								"name": "B",
+								"parent": "A",
+								"value": 20,
+								"probability": 1/2
+							},
+							{
+								"name": "B'",
+								"parent": "A",
+								"value": 20,
+								"probability": 1/2								
+							}
+						]
+					},
+					{
+						"name": "A'",
+						"parent": "",
+						"value": 20,
+						"probability": 1/2,
+						"children": [
+							{
+								"name": "B",
+								"parent": "A'",
+								"value": 20,
+								"probability": 1/2						
+							},
+							{
+								"name": "B'",
+								"parent": "A'",
+								"value": 20,
+								"probability": 1/2							
+							}
+						]
+					}
+				]
+
+			}
+		
+		]
+
+		
+		//define margins and size of chart
+		var margin = {top: 100, right: 10, bottom: 10, left: 10},
+			width = 450 - margin.left - margin.right,
+			height = 350 - margin.top - margin.bottom; 
+			
+		var chart = d3.probTree()
+			.width(width)
+			.height(height)
+			.trunkWidth(60);
+		
+		var plot = body.selectAll("svg")
+			.data(treeData)
+			.enter()
+			.append("svg")
+					.attr("class","chart")
+					.attr("width", width + margin.left + margin.right)
+					.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+				.call(chart);
+		
+		//group for stat display
+		
+		var displayPanel = body.append("div").attr("id","displayPanel");
+		
+		var controlpanel = displayPanel.append("div").attr("id","controlpanel");
+		
+		//instructional text
+		controlpanel.append("p").text("Click and drag the sliders to change the probabilties.").attr("class","paragraphText");
+		controlpanel.append("p").text("").attr("class","paragraphText");
+		
+			
+		function restart() {
+			// for each datum in data, call resample
+			// which maps new samples to the datum
+			plot.data(treeData2).call(chart);
+			iter = 0;
+		
+		}
+						
+		//----------------------------------------------------START----------------------------------------------------
+		
+		var height2 = 50;
+		
+		var control = d3.slider()
+			.height(height2)
+			.width(width);
+		
+		var sliderControls = controlpanel.selectAll("svg")
+			.data([[0],[1],[2]])
+			.enter()
+			.append("svg")
+				.attr("height",height2)
+				.attr("width", width+margin.left+margin.right)
+			.append("g")
+				.attr("transform", "translate(" + (margin.left) + "," + 0 + ")")
+				.call(control);
+
+		
+		</script>
+	
+    </body>
+</html>     

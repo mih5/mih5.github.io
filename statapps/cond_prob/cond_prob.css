@@ -1,0 +1,93 @@
+
+.axis .domain {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: .3;
+  stroke-width: 8px;
+  stroke-linecap: round;
+}
+
+.axis .halo {
+  fill: none;
+  stroke: #ddd;
+  stroke-width: 6px;
+  stroke-linecap: round;
+}
+
+.paragraphText {
+	font-family: sans-serif;
+	font-size: 0.9em;
+}
+
+#heading{
+	margin-left:auto;
+	margin-right:auto;
+	text-align: center;
+	font-family: Arial, sans-serif;
+	font-size: 2em;
+	clear: both;
+}
+
+
+.slider .handle {
+  fill: #fff;
+  stroke: #000;
+  stroke-opacity: .5;
+  stroke-width: 1.25px;
+}
+
+.chart{
+	display: block;
+	clear: both;
+	margin-left: auto;
+	margin-right: auto;
+	border: 1px solid LightGrey;
+}
+
+
+.controls{
+	display: block;
+	clear: both;
+	margin-left: auto;
+	margin-right: auto;
+	border: 1px solid LightGrey;
+}
+
+.node .label{
+	fill: white;
+	font: 20px sans-serif;
+	text-anchor: middle;
+}
+
+.node .jointProb {
+	fill: black;
+	font: 15px sans-serif;
+	text-anchor: middle;
+}
+
+.statDisplay{
+	font-family: Arial, sans-serif;
+	font-size: 0.9em;
+}
+
+#statlist{
+	list-style-type:none;
+}
+
+#mainbody{
+	position: relative;
+    width: 460px;
+    margin-left: auto ;
+    margin-right: auto ;
+	display: block;
+}
+
+
+#controlpanel{
+	width: 460px;
+	float: left;
+}
+
+#dataTable{
+	padding: 2px;
+}
