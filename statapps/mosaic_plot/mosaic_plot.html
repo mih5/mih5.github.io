@@ -23,7 +23,7 @@
 		//1. Code that runs when page is loaded
 			
 		//create centered "container" for chart and panels
-		var body = d3.select("body").append("div").attr("id","mainbody");
+		var body = d3.select("body").append("div").attr("class","mainbody");
 		
 		//title
 		body.append("h1").attr("id","heading").text("Mosaic Plot");
@@ -57,7 +57,7 @@
 		var controlpanel = displayPanel.append("div").attr("id","controlpanel");
 		
 		//instructional text
-		controlpanel.append("p").text("Drag the rectangles to reflect the distribution of X and Xc.").attr("class","paragraphText");
+		controlpanel.append("p").text("Drag the rectangles to reflect the marginal distributions of X and X' and the conditional distributions of Y and Y' given X and X' described in the table.").attr("class","paragraphText");
 		
 		//reset button
 		controlpanel.append("input")
@@ -245,9 +245,10 @@
 		function updateChart(data1, data2, targetdata){	
 			
 			var targetdataReformat = [ 
-				[ [], ["Y"], ["Y'"] ],
-				[ ["X"], [targetdata[0][0]], [targetdata[0][1]] ], 
-				[ ["X'"], [targetdata[1][0]], [targetdata[1][1]] ] 
+				[ [], ["Y"], ["Y'"], ["Total"] ],
+				[ ["X"], [targetdata[0][0]], [targetdata[0][1]], [targetdata[0][0]+targetdata[0][1]] ], 
+				[ ["X'"], [targetdata[1][0]], [targetdata[1][1]], [targetdata[1][0]+targetdata[1][1]] ],
+				[ ["Total"],[targetdata[0][0]+targetdata[1][0]], [targetdata[0][1]+targetdata[1][1]], [targetdata[0][0]+targetdata[0][1]+targetdata[1][0]+targetdata[1][1]]  ]
 			];
 			
 			
@@ -420,18 +421,6 @@
 		function restart(){
 			
 			history.go(0);
-			/*
-		    data1 = [{x: width/2, y: height/2}];
-			data2 = [{x: width/2, y: height/2},{x: width/2, y: height/2}];
-		
-			targetdata=generateCounts();
-			targetdata1 = calcData1(targetdata);
-			targetdata2 = calcData2(targetdata);
-			displayText = [{display: "Click and drag!", color: "black"}];
-			
-			updateDisplay(displayText);
-			updateChart(data1,[], targetdata);
-			*/
 
 		}
 		
@@ -453,12 +442,18 @@
 			return [ {x: sumX/(sumX+sumXc)*width, y: height*(1-data[0][0]/sumX)}, {x: sumX/(sumX+sumXc)*width, y: height*(1-data[1][0]/sumXc)},];
 		}
 		
-
 		
 		//---------------------------------------------------UTILITY FUNCTIONS-----------------------------------------
 		
 		
 		</script>
+		
+		<div class="mainbody">
+			<div id="infoText">
+				<p> Adapted from Mike Bostock's <a href="http://bl.ocks.org/mbostock/9669633">Multitouch Drag II</a> example.
+				</p>
+			</div>
+		</div>
 	
     </body>
 </html>     
