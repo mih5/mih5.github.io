@@ -22,7 +22,7 @@
 		//1. Code that runs when page is loaded
 			
 		//create centered "container" for chart and panels
-		var body = d3.select("body").append("div").attr("id","mainbody");
+		var body = d3.select("body").append("div").attr("class","mainbody");
 		
 		//title
 		body.append("h1").attr("id","heading").text("Histogram");
@@ -50,13 +50,6 @@
 		var displayPanel = body.append("div").attr("id","displayPanel");
 		
 		var statPanel = displayPanel.append("div").attr("id","statdiv");
-
-		var list0 = statPanel.append("ul")
-								.attr("class", "statlist");
-			
-		var list = statPanel.append("ul")
-								.attr("class", "statlist");
-	
 		
 		var controlpanel = displayPanel.append("div").attr("id","controlpanel");
 		
@@ -157,7 +150,7 @@
 			var bar = svg.selectAll(".bar")
 				.data(data);
 				
-			var movesLeft = list0.selectAll(".moves").data([values.length]);	
+			var movesLeft = svg.selectAll(".moves").data([values.length]);	
 			
 			var statLines = svg.selectAll(".statLines").data(stats.slice(0,2));
 			
@@ -175,7 +168,7 @@
 					.attr("width", xScale(data[0].dx-4) - 1)
 					.attr("height", function(d) { return height - yScale(d.y); });
 					
-			movesLeft.text(function(d) {return "Number of points: " + d;});
+			movesLeft.text(function(d) {return "# of points: " + d;});
 			
 			statLines.transition().duration(300).attr("transform", function(d,i) {return "translate(" + (xScale(d.stat)) + ","+(i*28)+")";})
 				.select("rect")
@@ -227,9 +220,10 @@
 					.attr("fill-opacity",0.25);
 								
 			movesLeft.enter()
-				.append("li")
+				.append("text")
+				.attr("x",width-40)
 				.attr("class", "moves")
-				.text(function(d) { return "Number of points: " + d;});
+				.text(function(d) { return "# of points: " + d;});
 				
 			//lines for displaying mean and median
 			statLines.enter()
@@ -476,8 +470,20 @@
 			return sum / n;
 		}
 		
+		//
+		
+		statPanel.append("p").text("How do the mean, median, and standard deviation (SD) summarize each distribution?").attr("class","paragraphText");
 		
 		</script>
+	
+		<div class="mainbody">
+			<div id="infoText">
+
+				<p> Adapted from Mike Bostock's <a href="http://bl.ocks.org/mbostock/929623">Build Your Own Graph!</a> and 
+					<a href="http://bl.ocks.org/mbostock/3048450">Histogram</a> examples.
+				</p>
+			</div>
+		</div>
 	
     </body>
 </html>     

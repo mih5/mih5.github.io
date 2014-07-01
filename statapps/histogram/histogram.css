@@ -71,6 +71,7 @@
 }
 
 .moves{
+	text-anchor: end;
 	font-family: Arial, sans-serif;
 	font-size: 0.9em;
 }
@@ -79,7 +80,7 @@
 	list-style-type:none;
 }
 
-#mainbody{
+.mainbody{
 	position: relative;
     width: 460px;
     margin-left: auto ;
@@ -101,4 +102,10 @@
 
 #displayPanel{
 	overflow: hidden;
+}
+
+#infoText{	
+	width: 450px;
+	font-family: sans-serif;
+	font-size: 0.75em;
 }
