@@ -1,35 +1,7 @@
 
-.bar rect {
-  fill: steelblue;
-  shape-rendering: crispEdges;
-}
-
-.bar text {
-  fill: #fff;
-  font: 10px sans-serif;
-}
-
 .paragraphText {
 	font-family: sans-serif;
 	font-size: 0.9em;
-}
-
-.chart text{
-	fill: black;
-	font: 10px sans-serif;
-	text-anchor: middle;
-}
-
-.axis path,
-.axis line {
-    fill: none;
-    stroke: black;
-    shape-rendering: crispEdges;
-}
-
-.axis text {
-    font-family: sans-serif;
-    font-size: 11px;
 }
 
 #heading{
@@ -96,5 +68,12 @@
 
 
 #dataTable{
-	padding: 2px;
+	border:1px solid black;
+}
+
+#marginalProbX, #marginalProbXc {
+	text-anchor: middle;
+	fill: white;
+	font-family: sans-serif;
+	font-size: 16;
 }
