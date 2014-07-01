@@ -51,13 +51,13 @@
 		
 		var statPanel = displayPanel.append("div").attr("id","statdiv");
 					
-		//statPanel.append("p").text("Data:").attr("class","paragraphText");
+		statPanel.append("p").text("Data").attr("class","paragraphText");
 		var table = statPanel.append("table").attr("id","dataTable");
 		
 		var controlpanel = displayPanel.append("div").attr("id","controlpanel");
 		
 		//instructional text
-		controlpanel.append("p").text("Drag the rectangles to reflect the data in the table.").attr("class","paragraphText");
+		controlpanel.append("p").text("Drag the rectangles to reflect the marginal and conditional distributions of the data in the table.").attr("class","paragraphText");
 		
 		//reset button
 		controlpanel.append("input")
