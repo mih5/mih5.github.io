@@ -23,7 +23,7 @@
 		//1. Code that runs when page is loaded
 			
 		//create centered "container" for chart and panels
-		var body = d3.select("body").append("div").attr("id","mainbody");
+		var body = d3.select("body").append("div").attr("class","mainbody");
 		
 		//title
 		body.append("h1").attr("id","heading").text("Box Plot");
@@ -31,15 +31,16 @@
 		//define margins and size of chart
 		var margin = {top: 10, right: 10, bottom: 20, left: 10},
 			width = 450 - margin.left - margin.right,
-			height = 150 - margin.top - margin.bottom;
+			height = 200 - margin.top - margin.bottom;
 		
-		var plotType = 0;
+		var plotType1 = 0;
+		var plotType2 = 0;
 				
 		var min = Infinity,
 			max = -Infinity;
 
 		//generate data
-		var data = [generateData(plotType),generateData(plotType),generateData(plotType)],
+		var data = [generateData(plotType1),generateData(plotType2)],
 			iter = 0;
 			
 		var chart = d3.box()
@@ -77,25 +78,9 @@
 		var controlpanel = displayPanel.append("div").attr("id","controlpanel");
 		
 		//instructional text
-		controlpanel.append("p").text("Select a distribution to sample:").attr("class","paragraphText");
+		controlpanel.append("p").text("Select two distributions to sample and click 'Restart.'").attr("class","paragraphText");
 		
-		var citation = statPanel.append("p")
-				.text("Adapted from Mike Bostock's ")
-				.attr("class","paragraphText");
-				
-		citation.append("a")
-				.attr("href","http://bl.ocks.org/mbostock/4061502")
-				.text("Box Plot");
-				
-		citation.append("text")
-				.text(" and ");
-				
-		citation.append("a")
-				.attr("href","http://bl.ocks.org/mbostock/3048450")
-				.text("Histogram");
-				
-		citation.append("text")
-				.text(" examples.");
+		statPanel.append("p").text("Use the menus to display different distributions.  How do box plots represent each distribution?").attr("class","paragraphText");
 		
 		var buttonNames = [ "Normal (0, 1)",
 			"Normal (0, 0.5)",
@@ -104,12 +89,27 @@
 			"Skewed right",
 			"Skewed left"]
 		
-		function change() {
-			plotType = selection.property('selectedIndex');
+		function change1() {
+			plotType1 = selection1.property('selectedIndex');
 		}
 		
-		var selection = controlpanel.append("select").on("change", change);
-		var options  = selection.selectAll('option').data(buttonNames);
+		function change2() {
+			plotType2 = selection2.property('selectedIndex');
+		}
+		
+		var table = controlpanel.append("table");
+		
+		var row1 = table.append("tr");
+		var row2 = table.append("tr");
+		
+		row1.append("td").text("Plot 1:").attr("class","paragraphText");
+		var selection1 = row1.append("td").append("select").on("change", change1);
+		var options  = selection1.selectAll('option').data(buttonNames);
+		options.enter().append("option").text(function (d){return d;});
+		
+		row2.append("td").text("Plot 2:").attr("class","paragraphText");
+		var selection2 = row2.append("td").append("select").on("change", change2);
+		var options  = selection2.selectAll('option').data(buttonNames);
 		options.enter().append("option").text(function (d){return d;});
 		
 		//reset button
@@ -202,15 +202,21 @@
 			
 		}
 		
-		function resample(d) {
+		function resample(d,i) {
 			//Need to map data
-			if (!d.resampler) d.resampler = resampler(d);
-			return d.map(resampler(d));
+			//if (!d.resampler) d.resampler = resampler(d);
+			if (i==0) {
+				return d.map(resampler(d,plotType1));
+			}
+			else {
+				return d.map(resampler(d,plotType2));
+			}
 		}
 		
-		function resampler(d){
+		function resampler(d,plotType){
 			//accessing the global variable plotType is bad form
-			switch( plotType){
+			console.log(plotType);
+			switch(plotType){
 				case 0:
 					return function(d) { return rnorm(1,0,1);};
 					break;
@@ -249,6 +255,15 @@
 		}
 		
 		</script>
+		
+			<div class="mainbody">
+			<div id="infoText">
+
+				<p> Adapted from Mike Bostock's <a href="http://bl.ocks.org/mbostock/4061502">Box Plot</a> and 
+					<a href="http://bl.ocks.org/mbostock/3048450">Histogram</a> examples.
+				</p>
+			</div>
+		</div>
 	
     </body>
 </html>     

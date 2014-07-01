@@ -63,15 +63,13 @@ d3.box = function() {
 			
 			//compute new y-scale
 			var y1 = d3.scale.linear()
-				.range([height,0])
+				.range([height,2*height/3])
 				.domain([0, d3.max(histData, function(d) { return d.y; })]);
 				
 			// HISTOGRAM BARS
 		
 			var bar = g.selectAll(".bar")
 				.data(histData);
-				
-			console.log(histData[0]);
 			
 			bar.enter().insert("rect")
 					.attr("class","bar")
@@ -110,7 +108,7 @@ d3.box = function() {
 				.attr("class","center")
 				//NOTE! take care not to write ".center"
 				.attr("x", function(d) {return x1(d[0]);})
-				.attr("y", height/2)
+				.attr("y", height/3)
 				.attr("height", 1)
 				.attr("width", function(d) {return x1(d[1]-d[0]+min);})
 				.style("opacity", 1e-6)
@@ -132,8 +130,8 @@ d3.box = function() {
 			IQbox.enter().append("rect")
 				.attr("class","box")
 				.attr("x", function(d) {return x1(d[0]);})
-				.attr("y", height/4)
-				.attr("height", height/2)
+				.attr("y", height/6)
+				.attr("height", height/3)
 				.attr("width", function(d) {return x1(d[2]-d[0]+min);});
 				
 			IQbox.transition()
@@ -155,8 +153,8 @@ d3.box = function() {
 			median.enter().append("rect")
 				.attr("class","median")
 				.attr("x", function(d) {return x1(d[1]);})
-				.attr("y", height/4)
-				.attr("height", height/2)
+				.attr("y", height/6)
+				.attr("height", height/3)
 				.attr("width" ,1);
 				
 			// WHISKERS
@@ -166,8 +164,8 @@ d3.box = function() {
 			whisker.enter().append("rect")
 					.attr("class", "whisker")
 					.attr("x", function(d) {return x1(d);})
-					.attr("y", height/4)
-					.attr("height", height/2)
+					.attr("y", height/6)
+					.attr("height", height/3)
 					.attr("width", 1)
 					.style("opacity", 1e-6)
 				.transition()
@@ -177,8 +175,8 @@ d3.box = function() {
 			whisker.transition()
 				.duration(duration)
 					.attr("x", function(d) {return x1(d);})
-					.attr("y", height/4)
-					.attr("height", height/2)
+					//.attr("y", height/4)
+					.attr("height", height/3)
 					.attr("width", 1)
 				.style("opacity", 1);
 
@@ -198,7 +196,7 @@ d3.box = function() {
 				.attr("class", "outlier")
 				.attr("r", 5)
 				.attr("cx", function(i) { return x0(d[i]); } )
-				.attr("cy", height/2)
+				.attr("cy", height/3)
 				.style("opacity", 1e-6)
 				.transition()
 				  .duration(duration)
@@ -227,9 +225,9 @@ d3.box = function() {
 			boxTick.enter().append("text")
 				.attr("class", "box")
 				.attr("x", function(d) {return x1(d);})
-				.attr("y", height/2)
+				.attr("y", height/3)
 				//bitwise AND "&"
-				.attr("dy", function(d,i) {return i & 1 ? -(height/4+5) : (height/4+15);})
+				.attr("dy", function(d,i) {return i & 1 ? -(height/6+5) : (height/6+15);})
 				.attr("text-anchor", "middle")
 				.text(function(d,i) {return ["Q1:","median:","Q3:"][i] +" "+format(d);});
 
@@ -246,9 +244,9 @@ d3.box = function() {
 			whiskerTick.enter().append("text")
 				.attr("class", "whisker")
 				.attr("x", function(d) {return x1(d);})
-				.attr("y", height/2)
+				.attr("y", height/3)
 				//bitwise AND "&"
-				.attr("dy", -(height/4+5))
+				.attr("dy", -(height/6+5))
 				.attr("text-anchor", "middle")
 				.text(format);
 

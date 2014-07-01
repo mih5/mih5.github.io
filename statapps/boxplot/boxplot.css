@@ -10,10 +10,6 @@
 	text-anchor: middle;
 }
 
-#axisLabel{
-	font: 20px sans-serif;
-}
-
 rect.box {
 	fill: white;
 	stroke-width: 1px;
@@ -86,7 +82,7 @@ circle.outlier {
 	list-style-type:none;
 }
 
-#mainbody{
+.mainbody{
 	position: relative;
     width: 460px;
     margin-left: auto ;
@@ -108,4 +104,10 @@ circle.outlier {
 
 #displayPanel{
 	overflow: hidden;
+}
+
+#infoText{	
+	width: 450px;
+	font-family: sans-serif;
+	font-size: 0.75em;
 }
