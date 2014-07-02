@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-52425901-1', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+    <head>
+        <meta charset="utf-8">
+        <title>Linear Regression</title>
+		<link type="text/css" rel="stylesheet" href="linear_regression.css" />
+        <script src="d3/d3.v3.js"></script>
+    </head>
+    <body>
+        <script>
+		
+		//1. Code that runs when page is loaded
+			
+		//create centered "container" for chart and panels
+		var body = d3.select("body").append("div").attr("id","mainbody");
+		
+		//title
+		body.append("h1").attr("id","heading").text("Linear Regression");
+		
+		//define margins and size of chart
+		var margin = {top: 20, right: 30, bottom: 30, left: 40},
+			width = 450 - margin.left - margin.right,
+			height = 400 - margin.top - margin.bottom;
+			
+		//create the chart
+		var svg0 = body.append("svg")
+					.attr("id","chart")
+					.attr("width", width + margin.left + margin.right)
+					.attr("height", height + margin.top + margin.bottom)
+					.on("mousemove", mousemove)
+					.on("mousedown", mousedown);
+					
+		var svg = svg0.append("g")
+					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		svg.append("text")
+			.attr("font-family","Arial,sans-serif")
+			.attr("font-size",20)
+			.attr("x", width)
+			.attr("y", height-5)
+			.style("text-anchor", "end")
+			.text("X");
+		
+		svg.append("text")
+			.attr("font-family","Arial,sans-serif")
+			.attr("font-size",20)
+			.attr("x",0)
+			.attr("y",20)
+			.attr("transform", "rotate(-90)")
+			.style("text-anchor","end")
+			.text("Y");
+		
+		//group for stat display
+		
+		var displayPanel = body.append("div").attr("id","displayPanel");
+		
+		var statPanel = displayPanel.append("div").attr("id","statdiv");
+
+		var list0 = statPanel.append("ul")
+								.attr("class", "statlist");
+			
+		var list = statPanel.append("ul")
+								.attr("class", "statlist");
+		
+		var controlpanel = displayPanel.append("div").attr("id","controlpanel");
+		
+		//instructional text
+		controlpanel.append("p").text("Select a trend:").attr("class","paragraphText");
+		
+		
+		var plotType = 0;
+		
+		var buttonNames = [ ["Linear up", "update0()"], 
+									["Linear down","update1()"],
+									["Quadratic","update1()"],]
+		
+		function change() {
+			plotType = selection.property('selectedIndex');
+		}
+		
+		var selection = controlpanel.append("select").on("change", change);
+		var options  = selection.selectAll('option').data(buttonNames);
+		options.enter().append("option").text(function (d){return d[0];});
+		
+		
+		
+		//reset button
+		controlpanel.append("input")
+			.attr("type", "button")
+			.attr("value", "Restart" )
+			.attr("onclick", "restart()");
+		
+		//initialize scales for chart
+		var xScale = d3.scale.linear()
+			.range([0,width]);
+		
+		var yScale = d3.scale.linear()
+			.range([height,0]);
+		
+		var cursor = svg.append("g").attr("transform", "translate(-100,-100)");
+		
+		
+		cursor.append("circle")
+				.attr("r", 6)
+				.attr("class", "cursor");
+				
+		cursor.append("text")
+				.attr("x", 4)
+				.attr("y", -4)
+				.attr("font-family", "Arial, sans-serif")
+				.text("Click!");
+		
+		var fulldata = generateData(30,plotType),
+			data = fulldata.slice(0,20),
+			iter = 0,
+			stats = calcStats(data),
+			sdX = 0,
+			position1 = 0,
+			position2 = 0,
+			intialized = false,
+			residualData = calcResidualData(data, stats),
+			regressionData = calcRegressionData(data, stats, sdX, position1, position2);
+		
+		var line = d3.svg.line()
+			.x(function(d) { return xScale(d.x); })
+			.y(function(d) { return yScale(d.y); })
+			.interpolate("linear");
+			
+		//----------------------------------------------------START----------------------------------------------------
+
+		
+		//Initial display
+		updateChart(data);
+		
+		function updateChart(data){
+			
+		
+			//update the statistics
+			stats = calcStats(data);
+			
+			// if this is the first time the plot has been displayed, update the scales
+			if (iter === 0){
+				//update scale
+				xScale.domain([d3.min(data, function(d) {return d.x;} ) - 2*stats[4].stat, d3.max(data, function(d) {return d.x;} ) + 2*stats[4].stat ]);
+				yScale.domain([d3.min(data, function(d) {return d.y;} ) - 2*stats[4].stat, d3.max(data, function(d) {return d.y;} ) + 2*stats[5].stat ]);
+				
+				sdX = stats[4].stat;
+				position1 = d3.min(data, function(d) {return d.x;} ) - 2*sdX;
+				position2 = d3.max(data, function(d) {return d.x;} ) + 2*sdX;
+			}
+			
+			regressionData = calcRegressionData(data,stats, sdX, position1, position2);
+			residualData = calcResidualData(data, stats);
+			
+			
+			
+			//store the number of times plot has run
+			iter ++;
+			
+			//define X axis
+			var xAxis = d3.svg.axis()
+				.scale(xScale)
+				.orient("bottom");
+			  
+			//define Y axis
+			var yAxis = d3.svg.axis()
+				.scale(yScale)
+				.orient("left");
+				
+			//DATA JOIN STEP
+			//here we are selecting elements with class .points, even if they haven't been created yet
+			
+			var points = svg.selectAll(".points").data(data);
+			
+			var movesLeft = list0.selectAll(".moves").data([iter-1]);
+			
+			var regressionLine = svg.datum(regressionData);
+			
+			var residualLines = svg.selectAll(".residuals").data(residualData);
+			
+			var statDisplayPlot = svg.selectAll(".statDisplayPlot").data(stats.slice(0,2));
+			
+			/*
+			var sdLine = svg.datum([
+									{x: position1, 
+									 y: stats[5].stat/stats[4].stat*(stats[2].stat-position1)+stats[3].stat
+									},
+									{x: position2, 
+									 y: stats[5].stat/stats[4].stat*(stats[2].stat-position2)+stats[3].stat
+									}
+									]);
+			*/
+			
+			//UPDATE STEP
+
+			points.transition().duration(300)
+				.attr("transform",function(d){return "translate("+xScale(d.x)+","+yScale(d.y)+")";});
+			
+			movesLeft.text(function(d) {return "Points added: " + d;});
+			
+			regressionLine.select(".regressionLine").transition().duration(300).attr("d",line);
+			
+			residualLines.transition().duration(300).attr("d",line);
+			
+			//sdLine.select(".sdLine").transition().duration(300).attr("d",line);
+			
+			statDisplayPlot.text(function(d) { return d.name+":	"+Math.round(d.stat*100)/100;});
+			
+			//EXIT STEP
+			points.exit().remove();
+			
+			svg.selectAll(".axis").data([]).exit().remove();
+			
+			residualLines.exit().remove();
+
+			//ENTER STEP
+			//Here we use the enter() selection of the points to create new points
+			
+			if (!intialized){
+				regressionLine.append("path").attr("class","regressionLine").attr("d", line).attr("stroke","steelblue").attr("stroke-width",1.5);
+				
+				/*
+				sdLine.append("path")
+					.attr("class","sdLine")
+					.attr("d", line)
+					.attr("stroke","steelblue")
+					.attr("stroke-width", 1.5)
+					.attr("fill-opacity", 0);
+				*/	
+				
+			}
+			
+				
+			statDisplayPlot.enter()
+					.append("text")
+						.attr("class","statDisplayPlot")
+						.attr("x",390)
+						.attr("y", function(d, i) {return i*15;})
+						.attr("text-anchor", "end")
+						.attr("font-family", "Arial, sans-serif")
+						.text(function(d) { return d.name+":	"+Math.round(d.stat*100)/100;});
+
+			
+			intialized = true;
+			
+			points.enter().append("g")
+					.attr("class","points")
+					.attr("transform",function(d){return "translate("+xScale(d.x)+","+yScale(d.y)+")";})
+				.append("circle")
+					.attr("fill",function(d) {return d.color})
+					.attr("fill-opacity",0)
+					.attr("r",5);
+							
+			points.selectAll("circle")
+					.transition().duration(300)
+					.attr("fill",function(d) {return d.color})
+					.attr("fill-opacity",0.5);
+			
+			residualLines.enter().append("path")
+					.attr("class", "residuals")
+					.attr("d", line)
+					.attr("stroke","steelblue")
+					.attr("stroke-width",1.5)
+					.attr("fill-opacity",0);
+					
+			residualLines.transition().duration(300)
+					.attr("d", line)
+					.attr("fill-opacity",1);
+					
+					
+			movesLeft.enter()
+				.append("li")
+				.attr("class", "moves")
+				.text(function(d) { return "Points added: " + d;});
+					
+			//Create X axis
+			svg.append("g")
+				.attr("class","axis")
+				.attr("transform", "translate(0," + height + ")")
+				.transition()
+				.duration(750)
+				.call(xAxis);
+			
+			//Create Y axis
+			svg.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(0,0)")
+				.transition()
+				.duration(750)
+				.call(yAxis);		
+		
+		}
+		
+		
+		function mousemove() {
+		  var coords = [d3.mouse(this)[0] - margin.left, d3.mouse(this)[1] - margin.top]
+		  cursor.attr("transform", "translate(" + coords + ")");
+		}
+		
+		function mousedown() {
+		
+			var point = d3.mouse(this),
+				datapoint = {x: xScale.invert(point[0]- margin.left), y: yScale.invert(point[1] - margin.top), color: "blue"},
+				n = data.push(datapoint);
+				
+			cursor.select("text").remove();
+			updateChart(data);
+		
+		}
+		
+		function restart() {
+			cursor.select("text").remove();
+			console.log(plotType);
+			fulldata = generateData(30,plotType);
+			data = fulldata.slice(0,20);
+			iter = 0;
+			updateChart(data);
+		}
+		
+		
+		//Utility functions
+		
+		function generateData(samples, plotTypeSelect){
+		
+			var sd = Math.random()*2
+		
+			switch(plotTypeSelect){
+				case 0:
+				var X =  runif(samples,0,Math.random()*10);
+				var Y =  [];
+				var slope = Math.random()*1.5;
+				for ( i = 0; i < X.length; i++){
+					Y[i]=X[i]*slope+rnorm(1,0,sd)[0];
+				}
+				var data = [];
+				for (var i = 0; i < X.length; i++){
+					var obs = {};
+					obs.x = X[i];
+					obs.y = Y[i];
+					obs.color = "red"
+					data[i] = obs;
+				}
+				return data;
+				
+				case 1:
+				var X =  runif(samples,0,Math.random()*10);
+				var Y =  [];
+				var slope = Math.random()*(-1.5);
+				for ( i = 0; i < X.length; i++){
+					Y[i]=X[i]*slope+rnorm(1,0,sd)[0];
+				}
+				var data = [];
+				for (var i = 0; i < X.length; i++){
+					var obs = {};
+					obs.x = X[i];
+					obs.y = Y[i];
+					obs.color = "red"
+					data[i] = obs;
+				}
+				return data;
+				
+				case 2:
+				var X =  runif(samples,-Math.random()*10,Math.random()*10);
+				var Y =  [];
+				for ( i = 0; i < X.length; i++){
+					Y[i]=(Math.pow(X[i],2)+rnorm(1,0,sd)[0]);
+				}
+				var data = [];
+				for (var i = 0; i < X.length; i++){
+					var obs = {};
+					obs.x = X[i];
+					obs.y = Y[i];
+					obs.color = "red"
+					data[i] = obs;
+				}
+				return data;
+			
+			}
+		
+			
+		}
+		
+		//UTILITY FUNCTIONS
+
+		//random normal
+		function rnorm(num_samples, mean, sd) {
+			var func = d3.random.normal(mean,sd);
+			var samples = new Array();
+			for (var i = 0; i < num_samples; i++ ){
+				samples.push(func());
+			}
+			return samples;
+		}
+
+		
+		function runif(num_samples,low, high){
+			var samples = new Array();
+			for (var i = 0; i < num_samples; i++){
+				samples.push(Math.random()*(high-low)+low);
+			}
+			return samples;
+		}
+		
+		//standard deviation - corrected population
+		function sd(x, f) {
+			var n = x.length;
+			if (n < 1) return NaN;
+			if (n === 1) return 0;
+			
+			var meanX = mean(x, f);
+			
+			var sumOfSquares = 0;
+			
+			for (var i = 0; i < n; i++){
+				var value = f.call(x, x[i], i);
+				sumOfSquares = sumOfSquares + Math.pow((value - meanX), 2);
+			}
+			
+			return Math.sqrt(sumOfSquares / (n-1));
+			
+		}
+
+		function calcStats(data){
+		var slope = regressionCoefficent(data, function(d) {return d.x;}, function(d) {return d.y;});
+		var intercept = regressionIntercept(slope, data);
+		return [
+				{
+				stat: slope,
+				name: "slope",
+				color: "#FF0000"
+				},
+				{
+				stat: intercept,
+				name: "intercept",
+				color: "black"
+				},
+				{
+				stat: Math.round(mean(data, function(d) {return d.x;})*100)/100,
+				name: "mean of X",
+				color: "black"
+				},
+				{
+				stat: Math.round(mean(data, function(d) {return d.y;})*100)/100,
+				name: "mean of Y",
+				color: "black"
+				},
+				{
+				stat: Math.round(sd(data, function(d) {return d.x;} )*100)/100,
+				name: "SD of X",
+				color: "black"
+				},
+				{
+				stat: Math.round(sd(data, function(d) {return d.y;} )*100)/100,
+				name: "SD of Y",
+				color: "black"
+				},
+				{
+				stat: Math.round(correlationCalculate(data, function(d) {return d.x;}, function(d) {return d.y;})*100)/100,
+				name: "your correlation",
+				color: "black"
+				}
+			];
+		}
+		
+				//mean
+		function mean(x, f){
+
+			var n = x.length;
+
+			var sum = 0;
+			
+			for (var i = 0; i < n; i++){
+				sum = sum + f.call(x, x[i], i);
+			}
+			
+			return sum / n;
+		}
+
+		function regressionCoefficent (data, f1, f2){
+			var n = data.length;
+			
+			var SS_XX = 0;
+			
+			for (var i = 0; i < n; i++){
+				SS_XX = SS_XX + Math.pow(f1.call(data, data[i], i),2);
+			}
+			
+			SS_XX = SS_XX - n * Math.pow(mean(data, f1),2);
+		
+			var SS_XY = 0;
+			
+			for (var i = 0; i < n; i++){
+				SS_XY = SS_XY + (f1.call(data, data[i], i))*(f2.call(data, data[i], i));
+			}
+			
+			SS_XY = SS_XY - n*(mean(data, f1))*(mean(data,f2));
+			
+			return SS_XY/SS_XX;
+		
+		}
+		
+		function regressionIntercept (coefficient,data){
+			return mean(data, function(d) {return d.y;})-coefficient*mean(data, function(d) {return d.x;});
+		}
+		
+		function calcRegressionData (data, stats, sdX, position1, position2) {
+		
+			return [{x: (position1), 
+							y: stats[0].stat*(position1)+stats[1].stat},
+							{x: (position2), 
+							y: stats[0].stat*(position2)+stats[1].stat}];
+		}
+		
+		function calcResidualData (data, stats){
+			
+			var n = data.length;
+			
+			var dataArray = [];
+		
+			for (var i = 0; i < n; i++){
+				var segment = [{x: data[i].x, y: data[i].y}, {x: data[i].x, y: stats[0].stat*data[i].x + stats[1].stat}];
+				dataArray.push(segment);
+			}
+		
+			return dataArray;
+		}
+		
+		
+		function correlationCalculate(array, f1, f2){
+
+			var n = array.length;
+			
+			var meanX = mean (array, f1);
+			
+			var meanY = mean (array, f2);
+			
+			var sdX = sd(array, f1);
+			
+			var sdY = sd(array, f2);
+			
+			var sum = 0;
+			for (var i = 0; i < n; i++){
+				var a = (f1.call(array, array[i], i) - meanX) / sdX;
+				var b = (f2.call(array, array[i], i) - meanY) / sdY;
+				sum = sum + (a * b);
+			}
+
+			return sum / (n-1);
+		}
+		
+		
+		</script>
+	
+    </body>
+</html>     
