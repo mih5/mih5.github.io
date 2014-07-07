@@ -54,8 +54,8 @@
 		var controlpanel = displayPanel.append("div").attr("id","controlpanel");
 		
 		//instructional text
-		controlpanel.append("p").text("Instructions: Click the plot to add points!  How does adding points change the histogram?").attr("class","paragraphText");
-		controlpanel.append("p").text("Select a distribution to sample:").attr("class","paragraphText");
+		controlpanel.append("p").text("Instructions").attr("class","paragraphText2");
+		controlpanel.append("p").text("Click the plot to add points!  How does adding points change the histogram?").attr("class","paragraphText");
 		
 		var plotType = 0;
 		
@@ -71,15 +71,20 @@
 			plotType = selection.property('selectedIndex');
 		}
 		
-		var selection = controlpanel.append("select").on("change", change);
-		var options  = selection.selectAll('option').data(buttonNames);
+		var controls = controlpanel.append("p").text("Select distribution to sample: ").attr("class","paragraphText");
+		var selection  = controls.append("select").on("change", change);
+		var options = selection.selectAll('option').data(buttonNames);
 		options.enter().append("option").text(function (d){return d;});
 		
 		//reset button
-		controlpanel.append("input")
+		controls.append("input")
 			.attr("type", "button")
 			.attr("value", "Restart" )
 			.attr("onclick", "restart()");
+			
+		controlpanel.append("p").text("Discussion Question").attr("class","paragraphText2");
+		controlpanel.append("p").text("How do the mean, median, and standard deviation (SD) change when points are added?  Are these statistics robust to extreme points?").attr("class","paragraphText");
+		
 		
 		//initialize scales for chart
 		var xScale = d3.scale.linear()
@@ -232,7 +237,7 @@
 					.transition().ease("elastic").duration(400)
 					.attr("fill","red")
 					.attr("fill-opacity",.3)
-					.attr("r", 7);
+					.attr("r", 8);
 								
 			movesLeft.enter()
 				.append("text")

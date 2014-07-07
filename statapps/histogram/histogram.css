@@ -4,6 +4,13 @@
 	font-size: 0.9em;
 }
 
+.paragraphText2 {
+	font-family: sans-serif;
+	font-size: 0.9em;
+	font-weight: bold;
+}
+
+
 .chart text{
 	fill: black;
 	font: 14px sans-serif;

@@ -57,13 +57,13 @@ d3.slider = function() {
 					.text(
 						function(d) {
 							if (d==0){
-								return "P(Ac) = "+Math.round((1-value)*100)/100;
+								return "P(A') = "+Math.round((1-value)*100)/100;
 							}
 							else if (d==1){
 								return "P(B'|A) = "+Math.round((1-value)*100)/100;
 							}
 							else {
-								return "P(B'|Ac) = "+Math.round((1-value)	*100)/100;
+								return "P(B'|A') = "+Math.round((1-value)	*100)/100;
 							}
 						}
 					)
