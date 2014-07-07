@@ -39,11 +39,10 @@ d3.scatterplot = function() {
 				.range([height,0])
 				.domain([d3.min(data, function(d) {return d.y;} ) - stats[5].stat, d3.max(data, function(d) {return d.y;} ) + stats[5].stat]);
 					
-			console.log(d);
 					
 			
 			if (d.newPoints) {
-				console.log("triggered");
+				
 				var stuff= d.newPoints.map(function(d) {return {x: xScale.invert(d.x), y: yScale.invert(d.y), color: "blue"};});
 				data = data.concat(stuff);
 			}			
@@ -68,18 +67,20 @@ d3.scatterplot = function() {
 			
 			//----------------------CALCULATE THE DATA---------------------------------
 			
+			var statData = [stats[0],stats[1]];
+			
 			if (options[1]) {
 				var residualData = calcResidualData(data, stats);
+				statData.push(stats[7]);
 			}
 			else {
 				var residualData = [];
 			}
 			
-			console.log(options);
-			
 			if (options[0]){
 				if (options[2]){
 					var regressionData = calcRegressionData(data, stats, position1, position2);
+					statData.push(stats[6]);
 				}
 				else{
 					var regressionData = [calcRegressionData(data, stats, position1, position2)[0]];
@@ -88,13 +89,13 @@ d3.scatterplot = function() {
 			else {
 				if (options [2]){
 					var regressionData = [[],calcRegressionData(data, stats, position1, position2)[1]];
+					statData.push(stats[6]);
 				}
 				else{
 					var regressionData = [];
 				}
 			}
 			
-			console.log(regressionData);
 			
 				
 			//---------------------SCATTERPLOT POINTS---------------------------------
@@ -165,9 +166,19 @@ d3.scatterplot = function() {
 			
 			//---------------------STATISTICS DISPLAY----------------------------------------
 			
+			var statBox = g.append("g").attr("transform", "translate(270,-15)");
+			
+			statBox.append("rect")
+				.attr("height", 35)
+				.attr("width", 150)
+				.attr("fill", "white")
+				.attr("stroke-width", "0")
+				.attr("stroke", "lightGrey");
+			
+			statBox.select("rect").attr("height", 15*4+5);
 			
 			//DATA JOIN
-			var statDisplayPlot = g.selectAll(".statDisplayPlot").data(stats.slice(0,2));
+			var statDisplayPlot = statBox.selectAll(".statDisplayPlot").data(statData);
 			
 			//UPDATE
 			statDisplayPlot.text(function(d) { return d.name+":	"+Math.round(d.stat*100)/100;});
@@ -176,8 +187,8 @@ d3.scatterplot = function() {
 			statDisplayPlot.enter()
 					.append("text")
 						.attr("class","statDisplayPlot")
-						.attr("x",390)
-						.attr("y", function(d, i) {return i*15;})
+						.attr("x",125)
+						.attr("y", function(d, i) {return i*15+15;})
 						.attr("text-anchor", "end")
 						.attr("font-family", "Arial, sans-serif")
 						.text(function(d) { return d.name+":	"+Math.round(d.stat*100)/100;});
@@ -233,6 +244,7 @@ d3.scatterplot = function() {
 function calcStats(data){
 var slope = regressionCoefficent(data, function(d) {return d.x;}, function(d) {return d.y;});
 var intercept = regressionIntercept(slope, data);
+var corr = correlationCalculate(data, function(d) {return d.x;}, function(d) {return d.y;});
 return [
 		{
 		stat: slope,
@@ -265,8 +277,13 @@ return [
 		color: "black"
 		},
 		{
-		stat: Math.round(correlationCalculate(data, function(d) {return d.x;}, function(d) {return d.y;})*100)/100,
-		name: "your correlation",
+		stat: Math.round(corr*100)/100,
+		name: "correlation",
+		color: "black"
+		},
+		{
+		stat: Math.round(Math.pow(corr,2)*100)/100,
+		name: "R-squared",
 		color: "black"
 		}
 	];
