@@ -54,7 +54,7 @@
 		var controlpanel = displayPanel.append("div").attr("id","controlpanel");
 		
 		//instructional text
-		controlpanel.append("p").text("Instructions: Click the plot to add points and change the histogram.").attr("class","paragraphText");
+		controlpanel.append("p").text("Instructions: Click the plot to add points!  How does adding points change the histogram?").attr("class","paragraphText");
 		controlpanel.append("p").text("Select a distribution to sample:").attr("class","paragraphText");
 		
 		var plotType = 0;
@@ -420,13 +420,13 @@
 					return runif(20,-4,4);
 					break;
 				case 3:
-					return rnormMixture(30,2,-2,.4,.4);
+					return rnormMixture(20,2,-2,.4,.4);
 					break;		
 				case 4:
-					return rSkewNorm(30,-1,1.5,10);
+					return rSkewNorm(20,-1,1.5,10);
 					break;
 				case 5:
-					return rSkewNorm(30,1,1.5,-10);
+					return rSkewNorm(20,1,1.5,-10);
 					break;
 				case 6:
 					console.log("build your own");
