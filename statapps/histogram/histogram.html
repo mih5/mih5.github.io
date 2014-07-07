@@ -49,12 +49,12 @@
 		
 		var displayPanel = body.append("div").attr("id","displayPanel");
 		
-		var statPanel = displayPanel.append("div").attr("id","statdiv");
+		//var statPanel = displayPanel.append("div").attr("id","statdiv");
 		
 		var controlpanel = displayPanel.append("div").attr("id","controlpanel");
 		
 		//instructional text
-		controlpanel.append("p").text("Click the plot to add points and change the histogram.").attr("class","paragraphText");
+		controlpanel.append("p").text("Instructions: Click the plot to add points and change the histogram.").attr("class","paragraphText");
 		controlpanel.append("p").text("Select a distribution to sample:").attr("class","paragraphText");
 		
 		var plotType = 0;
@@ -86,7 +86,7 @@
 			.range([0,width]);
 		
 		var yScale = d3.scale.linear()
-			.range([(height	),75]);
+			.range([(height	),115]);
 			
 		var values = generateData(plotType),
 			iter = 0,
@@ -168,15 +168,21 @@
 					.attr("width", xScale(data[0].dx-4) - 1)
 					.attr("height", function(d) { return height - yScale(d.y); });
 					
+			bar.select("text").attr("dy", ".85em")
+				.attr("y", 6)
+				.attr("x", xScale(data[0].dx-4) / 2)
+				.attr("text-anchor", "middle")
+				.attr("fill","white")
+				.text(function(d) { return d.y; });
+					
 			movesLeft.text(function(d) {return "# of points: " + d;});
 			
-			statLines.transition().duration(300).attr("transform", function(d,i) {return "translate(" + (xScale(d.stat)) + ","+(i*28)+")";})
+			statLines.transition().ease("elastic").duration(600).attr("transform", function(d,i) {return "translate(" + (xScale(d.stat)) + ","+(i*28+30)+")";})
 				.select("rect")
 					.attr("fill", function(d) {return d.color;});
 				
 			statLines.select(".statText").text(function(d) {return d.name + ": " + d.stat;})
 					.attr("fill", function(d) {return d.color;});
-					
 			
 			sdLine.transition().duration(300).attr("transform", function(d,i) {return "translate(" + 0 + ","+ (i*30) +")";})
 				.select("rect")
@@ -186,25 +192,35 @@
 			sdLine.select(".sdText").text(function(d) {return d.name + ": " + d.stat;})
 					.attr("fill", function(d) {return d.color;});
 			
-					
+			
 				
 			//ENTER
 			
 			
-			bar.enter().append("g")
+			barEnter = bar.enter().append("g")
 					.attr("class","bar")
-					.attr("transform", function(d) {return "translate(" + xScale(d.x) + "," + (height-30) + ")"; })
-				.append("rect")
+					.attr("transform", function(d) {return "translate(" + xScale(d.x) + "," + (height-30) + ")"; });
+					
+			barEnter.append("rect")
 					.attr("x", 1)
 					.attr("width", xScale(data[0].dx-4) - 1)
 					.attr("height", function(d) { return 0; });
 					
 				
-			bar.transition().duration(300)
+			barEnter.transition().duration(300)
 					.attr("transform", function(d) {return "translate(" + xScale(d.x) + "," + (yScale(d.y)-30) + ")"; })
 				.select("rect")
 					.attr("height", function(d) { return height - yScale(d.y); })
 					.attr("width", xScale(data[0].dx-4) - 1);
+			
+			barEnter.append("text")
+				.attr("dy", ".85em")
+				.attr("y", 6)
+				.attr("x", xScale(data[0].dx-4) / 2)
+				.attr("text-anchor", "middle")
+				.attr("fill","white")
+				.text(function(d) { return d.y; });
+
 			
 			points.enter().append("g")
 					.attr("class","points")
@@ -212,12 +228,11 @@
 				.append("circle")
 					.attr("fill",function(d) {return d.color})
 					.attr("fill-opacity",0)
-					.attr("r",5);
-							
-			points.selectAll("circle")
-					.transition().duration(300)
-					.attr("fill", "red")
-					.attr("fill-opacity",0.25);
+					.attr("r",0)
+					.transition().ease("elastic").duration(400)
+					.attr("fill","red")
+					.attr("fill-opacity",.3)
+					.attr("r", 7);
 								
 			movesLeft.enter()
 				.append("text")
@@ -229,7 +244,7 @@
 			statLines.enter()
 				.append("g")
 					.attr("class","statLines")
-					.attr("transform", function(d,i) {return "translate(" + (xScale(d.stat)) + ","+(i*28)+")";})
+					.attr("transform", function(d,i) {return "translate(" + (xScale(d.stat)) + ","+(i*28+30)+")";})
 				.append("rect")
 					.attr("width", 1.5)
 					.attr("height", 10)
@@ -472,7 +487,7 @@
 		
 		//
 		
-		statPanel.append("p").text("How do the mean, median, and standard deviation (SD) summarize each distribution?").attr("class","paragraphText");
+		//statPanel.append("p").text("How do the mean, median, and standard deviation (SD) summarize each distribution?").attr("class","paragraphText");
 		
 		</script>
 	

@@ -213,6 +213,24 @@ d3.scatterplot = function() {
 				.transition()
 				.duration(duration)
 				.call(yAxis);		
+				
+				
+			g.append("text")
+				.attr("font-family","Arial,sans-serif")
+				.attr("font-size",20)
+				.attr("x", width)
+				.attr("y", height-5)
+				.style("text-anchor", "end")
+				.text("X");
+			
+			g.append("text")
+				.attr("font-family","Arial,sans-serif")
+				.attr("font-size",20)
+				.attr("x",0)
+				.attr("y",20)
+				.attr("transform", "rotate(-90)")
+				.style("text-anchor","end")
+				.text("Y");
 			
 			
 		});

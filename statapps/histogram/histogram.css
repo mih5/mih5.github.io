@@ -22,7 +22,7 @@
 
 .bar text {
   fill: #fff;
-  font: 10px sans-serif;
+  font-family: sans-serif;
 }
 
 .axis path,
@@ -89,14 +89,8 @@
 }
 
 
-#statdiv{
-	display: block;
-	width: 200px;
-	float: right;
-}
-
 #controlpanel{
-	width: 200px;
+	width: 450px;
 	float: left;
 }
 
