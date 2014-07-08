@@ -121,7 +121,6 @@
 			  .attr("fill-opacity",1)
 			  .attr("stroke-width", 6);
 			
-			console.log(data1);
 			
 			if( Math.abs(data1[0].x - targetdata1[0].x) < 10){
 				displayText = [{display: "Correct! Now try drawing the conditional distributions:", color: "green"}];
@@ -177,6 +176,27 @@
 		  if ((Math.abs(data2[0].y-targetdata2[0].y)<10)&&(Math.abs(data2[1].y-targetdata2[1].y)<20)) {
 				displayText = [{display: "Correct!", color: "green"}];
 				updateDisplay(displayText);
+				
+				console.log("triggered");
+				
+				svg.append("rect")
+						.attr("x",-margin.left)
+						.attr("y",-margin.top)
+						.attr("width",width+margin.left+margin.right)
+						.attr("height",height+margin.top+margin.bottom)
+						.attr("fill","white")
+						.attr("fill-opacity", 0)
+						.transition().duration(1800)
+						.attr("fill-opacity",0.9); 
+						
+				svg.append("text")
+					.attr("y",height/2)
+					.attr("x",width/2)
+					.attr("text-anchor","middle")
+					.text("You got it!")
+					.attr("font-family","sans-serif")
+					.attr("font-size", 20);
+					
 		  }
 		  else if ((Math.abs(data2[0].y-targetdata2[0].y)<20)&&(Math.abs(data2[1].y-targetdata2[1].y)<40)) {
 				displayText = [{display: "Almost...", color: "#FF9900"}];
@@ -410,6 +430,7 @@
 					
 			plot2.exit().transition().duration(900).attr("fill-opacity",0).remove();
 					
+			
 					
 		}
 		
