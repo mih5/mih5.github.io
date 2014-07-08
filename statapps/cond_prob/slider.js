@@ -33,9 +33,8 @@ d3.slider = function() {
 					value = x.invert(d3.mouse(this)[0]);
 					brush.extent([value, value]);
 				}
-
 				
-				handle.attr("transform", "translate(" + x(value) +"," +  height / 2 + ")")
+				handle.transition().ease("elastic").duration(300).attr("transform", "translate(" + x(value) +"," +  2*height / 3 + ")")
 				handle.select("circle").attr("r", 12);
 
 				g.select("text.left")
@@ -45,10 +44,10 @@ d3.slider = function() {
 								return "P(A) = "+Math.round(value*100)/100;
 							}
 							else if (d==1){
-								return "P(B|A) = "+Math.round(value*100)/100;
+								return "P(C|A) = "+Math.round(value*100)/100;
 							}
 							else {
-								return "P(B|A') = "+Math.round(value*100)/100;
+								return "P(C|B) = "+Math.round(value*100)/100;
 							}
 						}
 					)
@@ -57,13 +56,13 @@ d3.slider = function() {
 					.text(
 						function(d) {
 							if (d==0){
-								return "P(A') = "+Math.round((1-value)*100)/100;
+								return "P(B) = "+Math.round((1-value)*100)/100;
 							}
 							else if (d==1){
-								return "P(B'|A) = "+Math.round((1-value)*100)/100;
+								return "P(D|A) = "+Math.round((1-value)*100)/100;
 							}
 							else {
-								return "P(B'|A') = "+Math.round((1-value)	*100)/100;
+								return "P(D|B) = "+Math.round((1-value)	*100)/100;
 							}
 						}
 					)
@@ -96,7 +95,7 @@ d3.slider = function() {
 		
 			g.append("g")
 				.attr("class", "x axis")
-				.attr("transform", "translate(0," + height / 2 + ")")
+				.attr("transform", "translate(0," + 2* height / 3 + ")")
 				.call(d3.svg.axis()
 					.scale(x)
 					.orient("bottom")
@@ -116,15 +115,17 @@ d3.slider = function() {
 			slider.selectAll(".extent,.resize")
 				.remove();
 			
+			slider.append("rect").attr("width",width).attr("height",height).attr("fill-opacity",0);
+			
 			var handle = slider.append("g")
 				.attr("class", "handle")
-				.attr("transform", "translate(0," +  height / 2 + ")")
+				.attr("transform", "translate(0," +  2* height / 3 + ")")
 				
 			handle.append("circle").attr("r", 9);
 
 					
 			g.append("text")
-				.attr("y", height/4)
+				.attr("y", height/2.5)
 				.attr("class", "left")
 				.attr("font-size", 15)
 				.attr("text-anchor", "start")
@@ -135,17 +136,17 @@ d3.slider = function() {
 							return "P(A) = "+0.5;
 						}
 						else if (d==1){
-							return "P(B|A) = "+0.5;
+							return "P(C|A) = "+0.5;
 						}
 						else {
-							return "P(B|A') = "+0.5;
+							return "P(C|B) = "+0.5;
 						}
 					}
 					);
 					
 			
 			g.append("text")
-				.attr("y", height/4)
+				.attr("y", height/2.5)
 				.attr("x", width)
 				.attr("class", "right")
 				.attr("text-anchor", "end")
@@ -154,13 +155,13 @@ d3.slider = function() {
 				.text(
 					function(d) {
 						if (d==0){
-							return "P(A') = "+0.5;
+							return "P(B) = "+0.5;
 						}
 						else if (d==1){
-							return "P(B'|A) = "+0.5;
+							return "P(D|A) = "+0.5;
 						}
 						else {
-							return "P(B'|A') = "+0.5;
+							return "P(D|B) = "+0.5;
 						}
 					}
 					);

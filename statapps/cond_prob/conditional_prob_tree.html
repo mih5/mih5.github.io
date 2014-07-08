@@ -47,13 +47,13 @@
 						"probability": 1/2,
 						"children": [
 							{
-								"name": "B",
+								"name": "C",
 								"parent": "A",
 								"value": 20,
 								"probability": 1/2
 							},
 							{
-								"name": "B'",
+								"name": "D",
 								"parent": "A",
 								"value": 20,
 								"probability": 1/2								
@@ -61,20 +61,20 @@
 						]
 					},
 					{
-						"name": "A'",
+						"name": "B",
 						"parent": "",
 						"value": 20,
 						"probability": 1/2,
 						"children": [
 							{
-								"name": "B",
-								"parent": "A'",
+								"name": "C",
+								"parent": "B",
 								"value": 20,
 								"probability": 1/2						
 							},
 							{
-								"name": "B'",
-								"parent": "A'",
+								"name": "D",
+								"parent": "B",
 								"value": 20,
 								"probability": 1/2							
 							}
@@ -90,7 +90,7 @@
 		//define margins and size of chart
 		var margin = {top: 100, right: 10, bottom: 10, left: 10},
 			width = 450 - margin.left - margin.right,
-			height = 350 - margin.top - margin.bottom; 
+			height = 330 - margin.top - margin.bottom; 
 			
 		var chart = d3.probTree()
 			.width(width)
@@ -114,10 +114,6 @@
 		
 		var controlpanel = displayPanel.append("div").attr("id","controlpanel");
 		
-		//instructional text
-		controlpanel.append("p").text("Click and drag the sliders to change the probabilties.").attr("class","paragraphText");
-		controlpanel.append("p").text("").attr("class","paragraphText");
-		
 			
 		function restart() {
 			// for each datum in data, call resample
@@ -129,7 +125,7 @@
 						
 		//----------------------------------------------------START----------------------------------------------------
 		
-		var height2 = 50;
+		var height2 = 40;
 		
 		var control = d3.slider()
 			.height(height2)
@@ -144,9 +140,25 @@
 			.append("g")
 				.attr("transform", "translate(" + (margin.left) + "," + 0 + ")")
 				.call(control);
+				
+		
+		//instructional text
+		controlpanel.append("p").text("Instructions").attr("class","paragraphText2");
+		controlpanel.append("p").text("Click and drag the sliders to change the probabilties.").attr("class","paragraphText");
+		
 
 		
 		</script>
+		
+	<div id="cat">
+			<p class=paragraphText2>Discussion Question</p>
+			<p class=paragraphText>How does changing the marginal and conditional probabilities of the events change the joint probabilities?</p>
+			<div id="infoText">
+				<p> Adapted from Mike Bostock's <a href="http://bl.ocks.org/mbostock/929623">Build Your Own Graph!</a> 
+				and <a href="http://bl.ocks.org/mbostock/4339083">Collapsible Tree</a> examples.
+				</p>
+			</div>
+		</div>
 	
     </body>
 </html>     

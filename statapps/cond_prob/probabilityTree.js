@@ -8,7 +8,7 @@ d3.probTree = function() {
 	var width = 1,
 		height = 1,
 		trunkWidth = 1,
-		duration = 300;
+		duration = 600;
 		
 	function probTree(g) {
 		
@@ -29,7 +29,7 @@ d3.probTree = function() {
 				.source(function(d,i) {
 					var sourceWidth = d.source.probability ? d.source.probability*(1-d.target.probability)*trunkWidth : (1-d.target.probability)*trunkWidth;
 					if (d.source.probability){
-						return d.target.name=="B" ? {x: d.source.x-sourceWidth/2, y: d.source.y} : {x: d.source.x+sourceWidth/2, y: d.source.y};
+						return d.target.name=="C" ? {x: d.source.x-sourceWidth/2, y: d.source.y} : {x: d.source.x+sourceWidth/2, y: d.source.y};
 					}
 					else {
 						return d.target.name=="A" ? {x: d.source.x-sourceWidth/2, y: d.source.y} : {x: d.source.x+sourceWidth/2, y: d.source.y};
@@ -81,7 +81,7 @@ d3.probTree = function() {
 				
 			nodeEnter.append("text")
 				.attr("class", "jointProb")
-				.attr("y", function(d) {return  d.name=="B" ? -60 : -30;})
+				.attr("y", function(d) {return  d.name=="C" ? -65 : -35;})
 				.text(function(d) { 
 							if (d.parent && d.parent.probability) {
 								return "P("+d.parent.name+","+d.name+") = " + d.parent.probability*d.probability;
@@ -99,7 +99,7 @@ d3.probTree = function() {
 			//update links
 			
 			link
-				.transition().duration(duration)
+				.transition().ease("elastic").duration(duration)
 				.style("stroke-width", function(d) {  return   (d.source.probability || d.source.probability==0)  ?  d.source.probability*d.target.probability*trunkWidth: d.target.probability*trunkWidth;} )
 				.attr("d", diagonal);
 
