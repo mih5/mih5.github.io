@@ -9,7 +9,7 @@ d3.scatterplot = function() {
 		// functions for calculating data
 		regression = calcRegressionData,
 		residuals = calcResidualData
-		duration = 300;
+		duration = 600;
 	
 		
 	function scatterplot(g) {
@@ -67,7 +67,7 @@ d3.scatterplot = function() {
 			
 			//----------------------CALCULATE THE DATA---------------------------------
 			
-			var statData = [stats[0],stats[1]];
+			var statData = [stats[1],stats[0]];
 			
 			if (options[1]) {
 				var residualData = calcResidualData(data, stats);
@@ -80,7 +80,7 @@ d3.scatterplot = function() {
 			if (options[0]){
 				if (options[2]){
 					var regressionData = calcRegressionData(data, stats, position1, position2);
-					statData.push(stats[6]);
+					statData.push(stats[4],stats[5],stats[6]);
 				}
 				else{
 					var regressionData = [calcRegressionData(data, stats, position1, position2)[0]];
@@ -89,7 +89,7 @@ d3.scatterplot = function() {
 			else {
 				if (options [2]){
 					var regressionData = [[],calcRegressionData(data, stats, position1, position2)[1]];
-					statData.push(stats[6]);
+					statData.push(stats[4],stats[5],stats[6]);
 				}
 				else{
 					var regressionData = [];
@@ -117,9 +117,10 @@ d3.scatterplot = function() {
 				.append("circle")
 					.attr("fill",function(d) {return d.color})
 					.attr("fill-opacity",0)
-					.attr("r",5)
-				.transition().duration(duration)
-					.attr("fill-opacity",0.5);
+					.attr("r",0)
+				.transition().ease("elastic").duration(duration)
+					.attr("fill-opacity",0.5)
+					.attr("r",5);
 			
 			//----------------------REGRESSION LINE-----------------------------------
 			
@@ -130,7 +131,7 @@ d3.scatterplot = function() {
 			regressionLine.exit().remove();
 			
 			//UPDATE
-			regressionLine.transition().duration(duration).attr("d",line);
+			regressionLine.transition().ease("elastic").duration(duration).attr("d",line);
 			
 			// ENTER
 			regressionLine
@@ -147,7 +148,7 @@ d3.scatterplot = function() {
 			var residualLines = g.selectAll(".residuals").data(residualData);
 			
 			//UPDATE
-			residualLines.transition().duration(duration).attr("d",line);
+			residualLines.transition().ease("elastic").duration(duration).attr("d",line);
 			
 			//EXIT
 			residualLines.exit().remove();
@@ -166,18 +167,18 @@ d3.scatterplot = function() {
 			
 			//---------------------STATISTICS DISPLAY----------------------------------------
 			
+			
 			g.select(".statBox").remove();
 			
-			var statBox = g.append("g").attr("transform", "translate(270,-15)");
+			var statBox = g.append("g").attr("transform", "translate(270,-15)").attr("class","statBox");
 			
 			statBox.append("rect")
 				.attr("height", 35)
 				.attr("width", 150)
 				.attr("fill", "white")
-				.attr("stroke-width", "0")
-				.attr("stroke", "lightGrey");
+				.attr("fill-opacity", 0.5);
 			
-			statBox.select("rect").attr("height", 15*4+5);
+			statBox.select("rect").attr("height", 15*statData.length+5);
 			
 			//DATA JOIN
 			var statDisplayPlot = statBox.selectAll(".statDisplayPlot").data(statData);

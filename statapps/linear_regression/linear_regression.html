@@ -23,7 +23,7 @@
 		//1. Code that runs when page is loaded
 			
 		//create centered "container" for chart and panels
-		var body = d3.select("body").append("div").attr("id","mainbody");
+		var body = d3.select("body").append("div").attr("class","mainbody");
 		
 		//title
 		body.append("h1").attr("id","heading").text("Linear Regression");
@@ -34,7 +34,7 @@
 		
 		var plotType = 0;
 			
-		var data = [{options: [true, false, false], data: generateData(30,plotType)}];
+		var data = [{options: [true, false, false], data: generateData(20,plotType)}];
 		
 		
 		//define margins and size of chart
@@ -78,12 +78,12 @@
 			statPanel = displayPanel.append("div").attr("id","statdiv"),
 			controlpanel = displayPanel.append("div").attr("id","controlpanel");
 		
-		statPanel.append("p").text("Display options:").attr("class", "paragraphText");
 		
-		var table = statPanel.append("table"),
+		
+		var table =statPanel.append("p").text("Show:").attr("class", "paragraphText").append("table"),
 			checklistData = [{name: "Regression Line"}, 
 							{name: "Residuals"}, 
-							{name: "Standard Deviation Line"}];
+							{name: "SD Line"}];
 		
 		var checklist = table.selectAll(".checks").data(checklistData);
 		
@@ -109,6 +109,8 @@
 			plotType = selection.property('selectedIndex');
 		}
 		
+		controlpanel.append("p").text("Instructions").attr("class","paragraphText2");
+		controlpanel.append("p").text("Click the scatterplot to add points and change the fit of the regression line.").attr("class","paragraphText");
 		controlpanel.append("p").text("Select a trend:").attr("class", "paragraphText");
 		
 		var selection = controlpanel.append("select").on("change", change);
@@ -132,7 +134,7 @@
 		function restart() {
 			//use property to get value
 			options = [d3.select("#checkbox0").property('checked') , d3.select("#checkbox1").property('checked'), d3.select("#checkbox2").property('checked')];
-			plots.datum({options: options, data: generateData(30,plotType)}).call(chart);
+			plots.datum({options: options, data: generateData(20,plotType)}).call(chart);
 		}
 		
 		
@@ -239,6 +241,18 @@
 		
 		
 		</script>
+		
+		<div class="mainbody">
+			<p class=paragraphText2>Discussion Questions</p>
+			<p class=paragraphText>What is the relationship between the correlation, the SD of X, the SD of Y, and the regression slope?</p>
+			<p class=paragraphText>When does a linear regression line not accurately describe the relationship between X and Y?</p>
+			<p class=paragraphText>What happens when outliers are added to the scatterplot?</p>
+			<div id="infoText">
+				<p> Adapted from Mike Bostock's <a href="http://bl.ocks.org/mbostock/929623">Build Your Own Graph!</a> example.
+				</p>
+			</div>
+		</div>
+	
 	
     </body>
 </html>     

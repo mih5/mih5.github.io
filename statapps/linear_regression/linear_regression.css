@@ -5,6 +5,11 @@
 }
 
 
+.paragraphText2 {
+	font-family: sans-serif;
+	font-size: 0.9em;
+	font-weight: bold;
+}
 .axis path,
 .axis line {
     fill: none;
@@ -60,7 +65,7 @@
 	list-style-type:none;
 }
 
-#mainbody{
+.mainbody{
 	position: relative;
     width: 460px;
     margin-left: auto ;
@@ -71,15 +76,21 @@
 
 #statdiv{
 	display: block;
-	width: 200px;
+	width: 100px;
 	float: right;
 }
 
 #controlpanel{
-	width: 200px;
+	width: 350px;
 	float: left;
 }
 
 #displayPanel{
 	overflow: hidden;
+}
+
+#infoText{	
+	width: 450px;
+	font-family: sans-serif;
+	font-size: 0.75em;
 }
