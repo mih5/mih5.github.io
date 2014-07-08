@@ -8,8 +8,8 @@ d3.scatterplot = function() {
 		height = 1
 		// functions for calculating data
 		regression = calcRegressionData,
-		residuals = calcResidualData
-		duration = 300;
+		duration = 600,
+		targetCorrelation = 0.5;
 	
 		
 	function scatterplot(g) {
@@ -24,7 +24,7 @@ d3.scatterplot = function() {
 			//	.options, options for display
 			var data = d.data,
 				options = d.options,
-				stats = calcStats(data),
+				stats = calcStats(data, targetCorrelation),
 				position1 = d3.min(data, function(d) {return d.x;} ) - stats[4].stat,
 				position2 = d3.max(data, function(d) {return d.x;} ) + stats[4].stat;
 			//---------------------------------------------------
@@ -48,7 +48,7 @@ d3.scatterplot = function() {
 			}			
 			
 			//update statistics
-			stats = calcStats(data);
+			stats = calcStats(data, targetCorrelation);
 			
 			var line = d3.svg.line()
 				.x(function(d) { return xScale(d.x); })
@@ -67,35 +67,11 @@ d3.scatterplot = function() {
 			
 			//----------------------CALCULATE THE DATA---------------------------------
 			
-			var statData = [stats[0],stats[1]];
+			var statData = [stats[7],stats[6]];
 			
-			if (options[1]) {
-				var residualData = calcResidualData(data, stats);
-				statData.push(stats[7]);
-			}
-			else {
-				var residualData = [];
-			}
 			
-			if (options[0]){
-				if (options[2]){
-					var regressionData = calcRegressionData(data, stats, position1, position2);
-					statData.push(stats[6]);
-				}
-				else{
-					var regressionData = [calcRegressionData(data, stats, position1, position2)[0]];
-				}
-			}
-			else {
-				if (options [2]){
-					var regressionData = [[],calcRegressionData(data, stats, position1, position2)[1]];
-					statData.push(stats[6]);
-				}
-				else{
-					var regressionData = [];
-				}
-			}
-			
+			var regressionData =  options[0] ? calcRegressionData(data, stats, position1, position2) : [];
+	
 			
 				
 			//---------------------SCATTERPLOT POINTS---------------------------------
@@ -117,9 +93,10 @@ d3.scatterplot = function() {
 				.append("circle")
 					.attr("fill",function(d) {return d.color})
 					.attr("fill-opacity",0)
-					.attr("r",5)
-				.transition().duration(duration)
-					.attr("fill-opacity",0.5);
+					.attr("r",0)
+				.transition().ease("elastic").duration(duration)
+					.attr("fill-opacity",0.5)
+					.attr("r",5);
 			
 			//----------------------REGRESSION LINE-----------------------------------
 			
@@ -130,7 +107,7 @@ d3.scatterplot = function() {
 			regressionLine.exit().remove();
 			
 			//UPDATE
-			regressionLine.transition().duration(duration).attr("d",line);
+			regressionLine.transition().ease("elastic").duration(duration).attr("d",line);
 			
 			// ENTER
 			regressionLine
@@ -139,41 +116,21 @@ d3.scatterplot = function() {
 					.attr("class","regressionLine")
 					.attr("d", line).attr("stroke","steelblue")
 					.attr("stroke-width",1.5)
-					.attr("stroke-dasharray", function(d,i) {return i==0 ? "1, 0": "5, 5"});
-			
-			//----------------------RESIDUAL LINES-----------------------------------------
-			
-			//DATA JOIN
-			var residualLines = g.selectAll(".residuals").data(residualData);
-			
-			//UPDATE
-			residualLines.transition().duration(duration).attr("d",line);
-			
-			//EXIT
-			residualLines.exit().remove();
-			
-			//ENTER
-			residualLines.enter().append("path")
-					.attr("class", "residuals")
-					.attr("d", line)
-					.attr("stroke","steelblue")
-					.attr("stroke-width",1.5)
-					.attr("fill-opacity",0)
-					.transition().duration(duration)
-					.attr("fill-opacity",1);
-				
+					.attr("stroke-dasharray","5, 5");
+		
 					
 			
 			//---------------------STATISTICS DISPLAY----------------------------------------
 			
-			var statBox = g.append("g").attr("transform", "translate(270,-15)");
+			g.select(".statBox").remove();
+			
+			var statBox = g.append("g").attr("transform", "translate(230,-15)").attr("class","statBox");
 			
 			statBox.append("rect")
 				.attr("height", 35)
-				.attr("width", 150)
+				.attr("width", width-220)
 				.attr("fill", "white")
-				.attr("stroke-width", "0")
-				.attr("stroke", "lightGrey");
+				.attr("fill-opacity", 0.5);
 			
 			statBox.select("rect").attr("height", 15*4+5);
 			
@@ -181,22 +138,24 @@ d3.scatterplot = function() {
 			var statDisplayPlot = statBox.selectAll(".statDisplayPlot").data(statData);
 			
 			//UPDATE
-			statDisplayPlot.text(function(d) { return d.name+":	"+Math.round(d.stat*100)/100;});
+			statDisplayPlot
+				.text(function(d) { return d.name+":	"+Math.round(d.stat*100)/100;});
 			
 			//ENTER
 			statDisplayPlot.enter()
 					.append("text")
 						.attr("class","statDisplayPlot")
-						.attr("x",125)
+						.attr("x",width-220)
 						.attr("y", function(d, i) {return i*15+15;})
 						.attr("text-anchor", "end")
+						.attr("fill", function(d) {return d.color;})
 						.attr("font-family", "Arial, sans-serif")
-						.text(function(d) { return d.name+":	"+Math.round(d.stat*100)/100;});
+						.text(function(d) { return d.name+": "+Math.round(d.stat*100)/100;});
 			
 			//----------------------AXES---------------------------------------------------
 			
 			//Remove previous axes
-			g.selectAll(".axis").data([]).exit().remove();
+			g.selectAll(".axis").remove();
 			
 			//Create X axis
 			g.append("g")
@@ -213,6 +172,58 @@ d3.scatterplot = function() {
 				.transition()
 				.duration(duration)
 				.call(yAxis);		
+				
+				
+			g.append("text")
+				.attr("class", "axis")
+				.attr("font-family","Arial,sans-serif")
+				.attr("font-size",20)
+				.attr("x", width)
+				.attr("y", height-5)
+				.style("text-anchor", "end")
+				.text("X");
+			
+			g.append("text")
+				.attr("class", "axis")
+				.attr("font-family","Arial,sans-serif")
+				.attr("font-size",20)
+				.attr("x",0)
+				.attr("y",20)
+				.attr("transform", "rotate(-90)")
+				.style("text-anchor","end")
+				.text("Y");
+			
+			
+			//---------------------------WIN CONDITION-----------------------------------
+			
+			var condition = Math.abs(stats[6].stat-stats[7].stat)<0.05 ? [true] : [];
+			
+			var winScreen = g.selectAll(".winScreen").data(condition);
+			
+			winScreen.exit().remove();
+			
+			var winScreenEnter = winScreen.enter()
+				.append("g")
+				.attr("class","winScreen");
+			
+			winScreenEnter.append("rect")
+					.attr("x",-margin.left)
+					.attr("y",-margin.top)
+					.attr("width",width+margin.left+margin.right)
+					.attr("height",height+margin.top+margin.bottom)
+					.attr("fill","white")
+					.attr("fill-opacity", 0)
+					.transition().duration(duration*3)
+					.attr("fill-opacity",0.9); 
+					
+			winScreenEnter.append("text")
+				.attr("y",height/2)
+				.attr("x",width/2)
+				.attr("text-anchor","middle")
+				.text("You got it!")
+				.attr("font-family","sans-serif")
+				.attr("font-size", 20);
+					
 			
 			
 		});
@@ -234,6 +245,12 @@ d3.scatterplot = function() {
 		return scatterplot;
 	};
 	
+	scatterplot.targetCorrelation = function(x) {
+		if (!arguments.length) return targetCorrelation;
+		targetCorrelation = x;
+		return scatterplot;
+	};
+	
 	
 	return scatterplot;
 };
@@ -241,10 +258,10 @@ d3.scatterplot = function() {
 //UTILITY FUNCTIONS
 
 // Function for calculating all the statistics
-function calcStats(data){
-var slope = regressionCoefficent(data, function(d) {return d.x;}, function(d) {return d.y;});
-var intercept = regressionIntercept(slope, data);
-var corr = correlationCalculate(data, function(d) {return d.x;}, function(d) {return d.y;});
+function calcStats(data, targetCorrelation){
+var slope = regressionCoefficent(data, function(d) {return d.x;}, function(d) {return d.y;}),
+	intercept = regressionIntercept(slope, data),
+	corr = correlationCalculate(data, function(d) {return d.x;}, function(d) {return d.y;});
 return [
 		{
 		stat: slope,
@@ -278,12 +295,12 @@ return [
 		},
 		{
 		stat: Math.round(corr*100)/100,
-		name: "correlation",
-		color: "black"
+		name: "your correlation",
+		color:  Math.abs(corr-targetCorrelation)<0.1 ? (Math.abs(corr-targetCorrelation)<0.05 ? "green" : "#FF9900") : "red"
 		},
 		{
-		stat: Math.round(Math.pow(corr,2)*100)/100,
-		name: "R-squared",
+		stat: targetCorrelation,
+		name: "target correlation",
 		color: "black"
 		}
 	];
@@ -345,23 +362,10 @@ function regressionIntercept (coefficient,data){
 function calcRegressionData (data, stats, position1, position2) {
 	var slope = stats[5].stat/stats[4].stat*(stats[6].stat && stats[6].stat / Math.abs(stats[6].stat));
 	return [
-				[{x: (position1), y: stats[0].stat*(position1)+stats[1].stat},
-				{x: (position2), y: stats[0].stat*(position2)+stats[1].stat}],
 				[ {x: (position1), y: stats[3].stat-(slope * (stats[2].stat-position1))},
 				{x: (position2), y: stats[3].stat-(slope * (stats[2].stat-position2))}
 				]
 			];
-}
-
-// A function which calculates the endpoints of the residuals
-function calcResidualData (data, stats){
-	var n = data.length;
-	var dataArray = [];
-	for (var i = 0; i < n; i++){
-		var segment = [{x: data[i].x, y: data[i].y}, {x: data[i].x, y: stats[0].stat*data[i].x + stats[1].stat}];
-		dataArray.push(segment);
-	}
-	return dataArray;
 }
 
 // A function which calculates the correlation

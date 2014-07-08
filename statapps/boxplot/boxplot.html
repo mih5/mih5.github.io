@@ -73,14 +73,15 @@
 		
 		var displayPanel = body.append("div").attr("id","displayPanel");
 		
-		var statPanel = displayPanel.append("div").attr("id","statdiv");
+		//var statPanel = displayPanel.append("div").attr("id","statdiv");
 			
 		var controlpanel = displayPanel.append("div").attr("id","controlpanel");
 		
 		//instructional text
+		controlpanel.append("p").text("Instructions").attr("class","paragraphText2");
 		controlpanel.append("p").text("Select two distributions to sample and click 'Restart.'").attr("class","paragraphText");
 		
-		statPanel.append("p").text("How do box plots represent each distribution?").attr("class","paragraphText");
+		//statPanel.append("p").text("How do box plots represent each distribution?").attr("class","paragraphText");
 		
 		var buttonNames = [ "Normal (0, 1)",
 			"Normal (0, 0.5)",
@@ -100,23 +101,26 @@
 		var table = controlpanel.append("table");
 		
 		var row1 = table.append("tr");
-		var row2 = table.append("tr");
+		//var row2 = table.append("tr");
 		
 		row1.append("td").text("Plot 1:").attr("class","paragraphText");
 		var selection1 = row1.append("td").append("select").on("change", change1);
 		var options  = selection1.selectAll('option').data(buttonNames);
 		options.enter().append("option").text(function (d){return d;});
 		
-		row2.append("td").text("Plot 2:").attr("class","paragraphText");
-		var selection2 = row2.append("td").append("select").on("change", change2);
+		row1.append("td").text("Plot 2:").attr("class","paragraphText");
+		var selection2 = row1.append("td").append("select").on("change", change2);
 		var options  = selection2.selectAll('option').data(buttonNames);
 		options.enter().append("option").text(function (d){return d;});
 		
 		//reset button
-		controlpanel.append("input")
+		row1.append("td").append("input")
 			.attr("type", "button")
 			.attr("value", "Restart" )
 			.attr("onclick", "restart()");
+			
+		controlpanel.append("p").text("Discussion Question").attr("class","paragraphText2");
+		controlpanel.append("p").text("How do boxplots represent each distribution?").attr("class","paragraphText");
 
 
 		//----------------------------------------------DATA GENERATION---------------------------------------------

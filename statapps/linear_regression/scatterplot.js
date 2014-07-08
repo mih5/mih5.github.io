@@ -166,6 +166,8 @@ d3.scatterplot = function() {
 			
 			//---------------------STATISTICS DISPLAY----------------------------------------
 			
+			g.select(".statBox").remove();
+			
 			var statBox = g.append("g").attr("transform", "translate(270,-15)");
 			
 			statBox.append("rect")
@@ -196,7 +198,7 @@ d3.scatterplot = function() {
 			//----------------------AXES---------------------------------------------------
 			
 			//Remove previous axes
-			g.selectAll(".axis").data([]).exit().remove();
+			g.selectAll(".axis").remove();
 			
 			//Create X axis
 			g.append("g")
@@ -218,6 +220,7 @@ d3.scatterplot = function() {
 			g.append("text")
 				.attr("font-family","Arial,sans-serif")
 				.attr("font-size",20)
+				.attr("class","axis")
 				.attr("x", width)
 				.attr("y", height-5)
 				.style("text-anchor", "end")
@@ -226,6 +229,7 @@ d3.scatterplot = function() {
 			g.append("text")
 				.attr("font-family","Arial,sans-serif")
 				.attr("font-size",20)
+				.attr("class","axis")
 				.attr("x",0)
 				.attr("y",20)
 				.attr("transform", "rotate(-90)")

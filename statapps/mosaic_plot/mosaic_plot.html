@@ -51,12 +51,13 @@
 		
 		var statPanel = displayPanel.append("div").attr("id","statdiv");
 					
-		statPanel.append("p").text("Data").attr("class","paragraphText");
+		statPanel.append("p").text("Data").attr("class","paragraphText2");
 		var table = statPanel.append("table").attr("id","dataTable");
 		
 		var controlpanel = displayPanel.append("div").attr("id","controlpanel");
 		
 		//instructional text
+		controlpanel.append("p").text("Instructions").attr("class","paragraphText2");
 		controlpanel.append("p").text("Drag the rectangles to reflect the marginal and conditional distributions of the data in the table.").attr("class","paragraphText");
 		
 		//reset button
@@ -449,6 +450,8 @@
 		</script>
 		
 		<div class="mainbody">
+			<p class=paragraphText2>Discussion Question</p>
+			<p class=paragraphText>What do the areas of the rectangles represent?</p>
 			<div id="infoText">
 				<p> Adapted from Mike Bostock's <a href="http://bl.ocks.org/mbostock/9669633">Multitouch Drag II</a> example.
 				</p>

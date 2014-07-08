@@ -12,7 +12,7 @@
 	</script>
     <head>
         <meta charset="utf-8">
-        <title>Linear Regression</title>
+        <title>Correlation Game</title>
 		<link type="text/css" rel="stylesheet" href="linear_regression.css" />
         <script src="d3/d3.v3.js"></script>
 		<script src="scatterplot.js"></script>
@@ -26,27 +26,30 @@
 		var body = d3.select("body").append("div").attr("id","mainbody");
 		
 		//title
-		body.append("h1").attr("id","heading").text("Linear Regression");
+		body.append("h1").attr("id","heading").text("Correlation Game");
 		
-		
-		//-------------------STRUCTURE OF PAGE-------------------------------------
-		
-		
-		var plotType = 0;
-			
-		var data = [{options: [true, false, false], data: generateData(30,plotType)}];
-		
-		
+		//variables for the game
+		var iter = 0;
+	
+		//--------------------------------------GENERATE A PLOT----------------------------------------
+	
+		//set the plot type and generate the data
+		var difficulty = 0,
+			data = [{options: [false], data: generateData(10,difficulty)}],
+			correlation = Math.round(correlationCalculate(data[0].data, function(d) {return d.x;}, function(d) {return d.y;})*100)/100;
+	
 		//define margins and size of chart
 		var margin = {top: 20, right: 30, bottom: 30, left: 40},
 			width = 450 - margin.left - margin.right,
 			height = 400 - margin.top - margin.bottom;
 			
-		
+		//define the chart-generating function
 		var chart = d3.scatterplot()
 			.width(width)
-			.height(height);
-			
+			.height(height)
+			.targetCorrelation(selectTarget(correlation));
+		
+		//generate the chart
 		var plots = body.selectAll("svg")
 				.data(data)
 			.enter()
@@ -60,7 +63,7 @@
 				.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 				.call(chart);
 		
-		// Append a cursor to the first plot
+		//append a cursor to the first plot
 		var cursor = d3.select("svg").append("g").attr("transform", "translate(-100,-100)");
 	
 		cursor.append("circle")
@@ -70,10 +73,11 @@
 		cursor.append("text")
 				.attr("x", 4)
 				.attr("y", -4)
+				//.attr("text-anchor","middle")
 				.attr("font-family", "Arial, sans-serif")
 				.text("Click!");
-		//
 		
+		//add panels after the chart
 		var displayPanel = body.append("div").attr("id","displayPanel"),
 			statPanel = displayPanel.append("div").attr("id","statdiv"),
 			controlpanel = displayPanel.append("div").attr("id","controlpanel");
@@ -81,8 +85,7 @@
 		statPanel.append("p").text("Display options:").attr("class", "paragraphText");
 		
 		var table = statPanel.append("table"),
-			checklistData = [{name: "Regression Line"}, 
-							{name: "Residuals"}, 
+			checklistData = [
 							{name: "Standard Deviation Line"}];
 		
 		var checklist = table.selectAll(".checks").data(checklistData);
@@ -93,7 +96,7 @@
 		checklistRows.append("td")
 			.append("input")
 				.attr("type", "checkbox")
-				.property("checked", function(d,i) {return i==0 ? true : false;})
+				.property("checked", false)
 				.attr("id", function(d,i) {return "checkbox"+i;})
 				.attr("onClick","refresh()");
 				
@@ -102,14 +105,14 @@
 				.text(function(d) {return d.name;})
 				.attr("class","paragraphText");
 		
-		var buttonNames = [ ["Linear up"], 
-									["Linear down"],
-									["Quadratic"],]
+		var buttonNames = [ ["Easy"], 
+									["Medium"],
+									["Hard"],]
 		function change() {
-			plotType = selection.property('selectedIndex');
+			difficulty = selection.property('selectedIndex');
 		}
 		
-		controlpanel.append("p").text("Select a trend:").attr("class", "paragraphText");
+		controlpanel.append("p").text("Select a difficulty:").attr("class", "paragraphText");
 		
 		var selection = controlpanel.append("select").on("change", change);
 		var options  = selection.selectAll('option').data(buttonNames);
@@ -122,39 +125,47 @@
 			.attr("value", "Restart" )
 			.attr("onClick", "restart()");
 		
-		//
+		//refreshes the plot after display options are changed
 		function refresh() {
-			var options = [d3.select("#checkbox0").property('checked') , d3.select("#checkbox1").property('checked'), d3.select("#checkbox2").property('checked')];
+			var options = [d3.select("#checkbox0").property('checked') ];
 			plots.datum({options: options, data: plots.datum().data, newPoints: plots.datum().newPoints}).call(chart);
 		}
 		
-		//
+		//restarts the plot
 		function restart() {
-			//use property to get value
-			options = [d3.select("#checkbox0").property('checked') , d3.select("#checkbox1").property('checked'), d3.select("#checkbox2").property('checked')];
-			plots.datum({options: options, data: generateData(30,plotType)}).call(chart);
+			var options = [d3.select("#checkbox0").property('checked') ];
+			data = [{options: options, data: generateData(10,difficulty)}],
+			correlation = Math.round(correlationCalculate(data[0].data, function(d) {return d.x;}, function(d) {return d.y;})*100)/100;
+			chart.targetCorrelation(selectTarget(correlation));
+			plots.datum(data[0]).call(chart);
 		}
 		
-		
-		
+		//functions for handing mouse movement and clicking
 		function mousemove() {
 		  var coords = [d3.mouse(this)[0], d3.mouse(this)[1]]
 		  cursor.attr("transform", "translate(" + coords + ")");
 		}
 		
 		function mousedown() {
-			
-			cursor.select("text").remove();
-		
-			var point = d3.mouse(this),
-				newpoint = {x: point[0]- margin.left, y: point[1] - margin.top, color: "blue"};
-				
-			var options = [d3.select("#checkbox0").property('checked') , d3.select("#checkbox1").property('checked'), d3.select("#checkbox2").property('checked')];
-			plots.datum({options: options, data: plots.datum().data, newPoints: plots.datum().newPoints ? plots.datum().newPoints.concat([newpoint]) : [newpoint]}).call(chart);
-		
+			if (iter < 100) {
+				cursor.select("text").remove();
+				var point = d3.mouse(this),
+					newpoint = {x: point[0]- margin.left, y: point[1] - margin.top, color: "blue"},
+					options = [d3.select("#checkbox0").property('checked') ];
+				plots.datum({options: options, data: plots.datum().data, newPoints: plots.datum().newPoints ? plots.datum().newPoints.concat([newpoint]) : [newpoint]}).call(chart);
+				iter++;
+			}
+			else{
+				cursor.append("text").text("No more moves!").attr("text-anchor","middle").attr("fill-opacity", "1").attr("x",4).attr("y",-7).attr("font-family", "Arial, sans-serif");
+				cursor.selectAll("text").transition().duration(1000).attr("fill-opacity", "0");
+			}
 		}
 		
-		//Utility functions
+		
+		
+		
+		
+		//----------------------------UTILITY FUNCTIONS------------------------------------------
 		
 		function generateData(samples, plotTypeSelect){
 		
@@ -215,8 +226,6 @@
 		
 			
 		}
-		
-		//UTILITY FUNCTIONS
 
 		//random normal
 		function rnorm(num_samples, mean, sd) {
@@ -237,6 +246,66 @@
 			return samples;
 		}
 		
+		//mean
+		function mean(x, f){
+
+			var n = x.length;
+
+			var sum = 0;
+			
+			for (var i = 0; i < n; i++){
+				sum = sum + f.call(x, x[i], i);
+			}
+			
+			return sum / n;
+		}
+
+		//standard deviation - corrected population
+		function sd(x, f) {
+			var n = x.length;
+			if (n < 1) return NaN;
+			if (n === 1) return 0;
+			
+			var meanX = mean(x, f);
+			
+			var sumOfSquares = 0;
+			
+			for (var i = 0; i < n; i++){
+				var value = f.call(x, x[i], i);
+				sumOfSquares = sumOfSquares + Math.pow((value - meanX), 2);
+			}
+			
+			return Math.sqrt(sumOfSquares / (n-1));
+			
+		}
+		
+		function selectTarget(correlation){
+			var target = Math.round((Math.random()*2-1)*100)/100;
+			if (Math.abs(target-correlation) > 0.2){
+				return target;
+			}
+			else{
+				return selectTarget(correlation);
+			}
+		}
+		
+		function correlationCalculate(array, f1, f2){
+
+			var n = array.length,
+				meanX = mean (array, f1),
+				meanY = mean (array, f2),
+				sdX = sd(array, f1),
+				sdY = sd(array, f2),
+				sum = 0;
+				
+			for (var i = 0; i < n; i++){
+				var a = (f1.call(array, array[i], i) - meanX) / sdX;
+				var b = (f2.call(array, array[i], i) - meanY) / sdY;
+				sum = sum + (a * b);
+			}
+
+			return sum / (n-1);
+		}
 		
 		</script>
 	
