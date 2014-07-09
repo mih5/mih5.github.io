@@ -219,7 +219,6 @@
 		
 		function resampler(d,plotType){
 			//accessing the global variable plotType is bad form
-			console.log(plotType);
 			switch(plotType){
 				case 0:
 					return function(d) { return rnorm(1,0,1);};

@@ -15,7 +15,8 @@ d3.box = function() {
 		//to iqr(1.5)
 		whiskers = boxWhiskers,
 		//quartiles, the function boxQuartiles
-		quartiles = boxQuartiles;
+		quartiles = boxQuartiles,
+		cdf = empiricalCDF;
 	
 		
 	function box(g) {
@@ -275,7 +276,40 @@ d3.box = function() {
 				.transition()
 				.duration(duration)
 				.call(xAxis);
+				
+
 			
+			//------------------QUANTILE DISPLAY---------------
+			
+			var quantileDisplay = g.selectAll(".quantileDisplay").data([true]);
+			
+			quantileDisplay.text(0+"% shaded");
+			
+			quantileDisplay.enter().append("text")
+				.attr("class","quantileDisplay")
+				.attr("x",45)
+				.attr("y", 3.5*height/4)
+				.text(0+"% shaded");
+			
+			// -----------------HIGHLIGHT---------------------
+			
+			
+			var svg = d3.select(this.parentNode).on("mousemove", mousemove);
+			
+			function mousemove() {
+				var coords = d3.mouse(this)[0];
+				chartline.attr("width", width-coords);
+				quantileDisplay.text( Math.round(cdf(x1.invert(coords-margin.left),d)*10000)/100 +"% shaded" );
+			}
+			
+			svg.select(".cursor").remove();
+			
+			var chartline = svg.append("rect")
+				.attr("width", 500)
+				.attr("height", height/2-20)
+				.attr("transform","translate("+ width + "," + (margin.top+height/2+20) + ")"+" scale(" + -1 + "," + 1 + ")")
+				.attr("class", "cursor");
+
 		
 		});
 		
@@ -317,6 +351,18 @@ function boxQuartiles(d) {
   ];
 }
 
+
+//empirical CDF
+function empiricalCDF(quantile, dataValues){
+	var n = dataValues.length;
+	var count = 0;
+	for (i = 0; i < n; i++){
+		if (dataValues[i] < quantile){
+			count ++;
+		}
+	}
+return count/n;
+}
 
 
 })();

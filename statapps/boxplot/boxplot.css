@@ -32,7 +32,7 @@ circle.outlier {
 .bar  {
   fill: steelblue;
   shape-rendering: crispEdges;
-  fill-opacity: 0.3;
+  fill-opacity: 1;
 }
 
 .axis path,
@@ -70,8 +70,8 @@ circle.outlier {
 }
 
 .cursor{
-  fill: none;
-  stroke: blue;
+  fill: #fff;
+  fill-opacity: 0.3;
   pointer-events: none;
 }
 
@@ -96,9 +96,6 @@ circle.outlier {
     margin-right: auto ;
 	display: block;
 }
-
-
-
 
 #controlpanel{
 	width: 450px;
