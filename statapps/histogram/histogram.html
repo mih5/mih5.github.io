@@ -293,16 +293,17 @@
 						.attr("fill-opacity", 0)
 						.transition().duration(300)
 						.attr("fill-opacity", 1);
+						
+				svg.append("g")
+				.attr("class","axis")
+				.attr("transform", "translate(0," + height + ")")
+				.transition()
+				.duration(750)
+				.call(xAxis);
 			}
 				
-			svg.select(".axis").remove();
 				
-			svg.append("g")
-			.attr("class","axis")
-			.attr("transform", "translate(0," + height + ")")
-			.transition()
-			.duration(750)
-			.call(xAxis);
+			
 			
 			//EXIT
 			
