@@ -295,6 +295,8 @@
 						.attr("fill-opacity", 1);
 			}
 				
+			svg.select(".axis").remove();
+				
 			svg.append("g")
 			.attr("class","axis")
 			.attr("transform", "translate(0," + height + ")")
