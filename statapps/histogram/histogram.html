@@ -138,7 +138,7 @@
 
 				
 			//use the histogram layout
-			var data = d3.layout.histogram().bins(xScale.ticks(10))(values);
+			var data = d3.layout.histogram().range([-4,4]).bins(xScale.ticks(10))(values);
 		
 			//update the domain of the scales
 			yScale.domain([0, d3.max(data, function(d) { return d.y; })]);
