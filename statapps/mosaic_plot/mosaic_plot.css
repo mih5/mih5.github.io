@@ -1,3 +1,16 @@
+.axis path,
+.axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+	fill: black;
+    font-family: sans-serif;
+    font-size: 11px;
+}
+
 
 .paragraphText {
 	font-family: sans-serif;

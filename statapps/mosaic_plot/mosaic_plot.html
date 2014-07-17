@@ -29,7 +29,7 @@
 		body.append("h1").attr("id","heading").text("Mosaic Plot");
 		
 		//define margins and size of chart
-		var margin = {top: 40, right: 60, bottom: 40, left: 30},
+		var margin = {top: 40, right: 60, bottom: 40, left: 60},
 			width = 450 - margin.left - margin.right,
 			height = 400 - margin.top - margin.bottom; 
 			
@@ -103,9 +103,9 @@
 				thisThing.selectAll(".text2")
 				.attr("x", function(d) {return (width-(width-d.x)/2);});
 						
-				thisThing.select("#marginalProbX").text("P(X) = "+Math.round(d.x/width*100)/100);
+				thisThing.select("#marginalProbX").text(+Math.round(d.x/width*100)+"%");
 				
-				thisThing.select("#marginalProbXc").text("P(X') = "+Math.round((1-d.x/width)*100)/100);
+				thisThing.select("#marginalProbXc").text(Math.round((1-d.x/width)*100)+"%");
 
 				data2[0].x = d.x;
 				data2[1].x = d.x;
@@ -266,9 +266,9 @@
 		function updateChart(data1, data2, targetdata){	
 			
 			var targetdataReformat = [ 
-				[ [], ["Y"], ["Y'"], ["Total"] ],
-				[ ["X"], [targetdata[0][0]], [targetdata[0][1]], [targetdata[0][0]+targetdata[0][1]] ], 
-				[ ["X'"], [targetdata[1][0]], [targetdata[1][1]], [targetdata[1][0]+targetdata[1][1]] ],
+				[ [], ["C"], ["D"], ["Total"] ],
+				[ ["A"], [targetdata[0][0]], [targetdata[0][1]], [targetdata[0][0]+targetdata[0][1]] ], 
+				[ ["B"], [targetdata[1][0]], [targetdata[1][1]], [targetdata[1][0]+targetdata[1][1]] ],
 				[ ["Total"],[targetdata[0][0]+targetdata[1][0]], [targetdata[0][1]+targetdata[1][1]], [targetdata[0][0]+targetdata[0][1]+targetdata[1][0]+targetdata[1][1]]  ]
 			];
 			
@@ -313,7 +313,7 @@
 				.attr("class", "text1")
 				.attr("x", function(d) {return d.x/2;})
 				.attr("y", height+20)
-				.text("X")
+				.text("A")
 				.attr("text-anchor","middle")
 				.attr("font-family","sans-serif");
 				
@@ -322,7 +322,7 @@
 				.attr("class", "text2")
 				.attr("x", function(d) {return (width-(width-d.x)/2);})
 				.attr("y", height+20)
-				.text("X'")
+				.text("B")
 				.attr("text-anchor","middle")
 				.attr("font-family","sans-serif");
 				
@@ -360,7 +360,7 @@
 				.attr("id", "marginalProbX")
 				.attr("x", function(d) {return d.x/2;})
 				.attr("y", height/2)
-				.text("P(X) = "+0.5);
+				.text("50%");
 			
 			plot1enter
 				.append("text")
@@ -368,7 +368,7 @@
 				.attr("id", "marginalProbXc")
 				.attr("x", function(d) {return (width-(width-d.x)/2);})
 				.attr("y", height/2)
-				.text("P(X') = "+0.5);
+				.text("50%");
 				
 			//ENTER PLOT 2
 		
@@ -378,6 +378,21 @@
 				.attr("fill-opacity", 1)
 				.call(drag2);
 			
+			// axes
+			
+			//define Y axis
+			var yAxis = d3.svg.axis()
+				.scale(d3.scale.linear().range([height-4,4]).domain([0,100]))
+				.orient("left")
+				.tickFormat(function(d) { return d + "%"; });
+			
+			plot2enter.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(-5,0)")
+				.transition()
+				.duration(600)
+				.call(yAxis);		
+			
 			//marginal labels
 			
 			plot2enter
@@ -385,7 +400,7 @@
 				.attr("x", width+10)
 				.attr("y", function(d,i) {return ((1-i)*100+i*(200));})
 				.attr("class","text3")
-				.text(function(d,i){if(i==0){return "Y'";} else{return "Y";}})
+				.text(function(d,i){if(i==0){return "D";} else{return "C";}})
 				.attr("font-family","sans-serif");
 				
 			plot2enter
@@ -393,7 +408,7 @@
 				.attr("x", function(d,i) {return ((1-i)*(d.x/2)+i*(width-(width-d.x)/2));})
 				.attr("y", height+20)
 				.attr("class", "text4")
-				.text(function(d,i){if(i==0){return "X";} else{return "X'";}})
+				.text(function(d,i){if(i==0){return "A";} else{return "B";}})
 				.attr("text-anchor","middle")
 				.attr("font-family","sans-serif");
 				
