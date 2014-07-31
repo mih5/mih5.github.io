@@ -104,7 +104,8 @@
 		
 		var buttonNames = [ ["Linear up"], 
 									["Linear down"],
-									["Quadratic"],]
+									["Quadratic"],
+									["Fan-shaped"]]
 		function change() {
 			plotType = selection.property('selectedIndex');
 		}
@@ -212,6 +213,24 @@
 					data[i] = obs;
 				}
 				return data;
+				
+				case 3: 
+				var X =  runif(samples,0,Math.random()*10);
+				var Y =  [];
+				var slope = Math.random()*1.5;
+				for ( i = 0; i < X.length; i++){
+					Y[i]=X[i]*slope+rnorm(1,0,2*X[i]/3)[0];
+				}
+				var data = [];
+				for (var i = 0; i < X.length; i++){
+					var obs = {};
+					obs.x = X[i];
+					obs.y = Y[i];
+					obs.color = "red"
+					data[i] = obs;
+				}
+				return data;
+				
 			
 			}
 		

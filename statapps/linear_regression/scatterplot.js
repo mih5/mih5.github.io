@@ -70,6 +70,7 @@ d3.scatterplot = function() {
 			var statData = [stats[1],stats[0]];
 			
 			if (options[1]) {
+				// show residuals 
 				var residualData = calcResidualData(data, stats);
 				statData.push(stats[7]);
 			}
@@ -79,6 +80,7 @@ d3.scatterplot = function() {
 			
 			if (options[0]){
 				if (options[2]){
+					// show SD LINE + regression line
 					var regressionData = calcRegressionData(data, stats, position1, position2);
 					statData.push(stats[4],stats[5],stats[6]);
 				}
@@ -88,6 +90,7 @@ d3.scatterplot = function() {
 			}
 			else {
 				if (options [2]){
+					// show SD LINE + regression line
 					var regressionData = [[],calcRegressionData(data, stats, position1, position2)[1]];
 					statData.push(stats[4],stats[5],stats[6]);
 				}
@@ -162,8 +165,14 @@ d3.scatterplot = function() {
 					.attr("fill-opacity",0)
 					.transition().duration(duration)
 					.attr("fill-opacity",1);
-				
-					
+			
+			/*
+			residualLines.enter().append("g")
+				.attr("class", "residuals")
+				.attr("transform", function(d) {return "translate("+(xScale(d[0].x))+","+(yScale( (d[0].y+d[1].y)/2 ))+")";})
+				.append("text")
+				.text(function(d) {return Math.round((d[0].y-d[1].y)*100)/100;});
+			*/	
 			
 			//---------------------STATISTICS DISPLAY----------------------------------------
 			
