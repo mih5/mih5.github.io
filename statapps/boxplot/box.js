@@ -230,11 +230,11 @@ d3.box = function() {
 				//bitwise AND "&"
 				.attr("dy", function(d,i) {return i & 1 ? -(height/6+5) : (height/6+15);})
 				.attr("text-anchor", "middle")
-				.text(function(d,i) {return ["Q1:","median:","Q3:"][i] +" "+format(d);});
+				.text(function(d,i) {return ["","",""][i] +" "+format(d);});
 
 			boxTick.transition()
 				.duration(duration)
-				.text(function(d,i) {return ["Q1:","median:","Q3:"][i] +" "+format(d);})
+				.text(function(d,i) {return ["","",""][i] +" "+format(d);})
 				.attr("x", function(d) {return x1(d);});
 					
 					

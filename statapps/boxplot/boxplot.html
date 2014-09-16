@@ -119,8 +119,14 @@
 			.attr("value", "Restart" )
 			.attr("onclick", "restart()");
 			
-		controlpanel.append("p").text("Discussion Question").attr("class","paragraphText2");
-		controlpanel.append("p").text("How do boxplots represent each distribution?").attr("class","paragraphText");
+		controlpanel.append("p").text("Discussion Questions").attr("class","paragraphText2");
+		controlpanel.append("p").text("What do the median, first quartile, second quartile, and whiskers represent?").attr("class","paragraphText");
+		controlpanel.append("p").text("How would you find the interquartile range (IQR) ?").attr("class","paragraphText");
+		controlpanel.append("p").text("Can you describe the shape of each distribution without looking at the histogram?").attr("class","paragraphText");
+		
+		controlpanel.append("p").text("Example Boxplot").attr("class","paragraphText2");
+		controlpanel.append("svg").append("image").attr("xlink:href","example.png").attr("height", height*0.8)
+					.attr("width", width*0.8);
 
 
 		//----------------------------------------------DATA GENERATION---------------------------------------------
